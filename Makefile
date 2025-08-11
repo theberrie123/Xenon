@@ -53,7 +53,7 @@ $(ISO): $(KERNEL) $(GRUBDIR)/grub.cfg
 	grub-mkrescue -o $@ build
 
 clean:
-	rm -rf build/obj/*.o build/bin/kernel.elf build/bin/os.iso build/boot
+	rm -rf build
 
 run: $(ISO)
 	$(QEMU) -cdrom $<

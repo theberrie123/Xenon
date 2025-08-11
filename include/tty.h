@@ -26,6 +26,5 @@ void putchar_update_cursor(char c);
 void move_cursor(int dx, int dy);
 void draw_cursor(int x, int y);
 
-void keyboard_handler();
 
 #endif
