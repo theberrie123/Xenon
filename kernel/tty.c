@@ -1,7 +1,7 @@
 #include "../include/tty.h"
 #include "../include/type.h"
 #include "../include/string.h"
-
+#include "../include/io.h"
 
 typedef __builtin_va_list va_list;
 #define va_start(ap, last) __builtin_va_start(ap, last)
@@ -16,39 +16,9 @@ static int cursor_row;
 static int cursor_col;
 static uint8_t KCOLOR;
 
-static void outb(uint16_t port, uint8_t val)
-{
-        __asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
-}
-
-static uint8_t inb(uint16_t port)
-{
-        uint8_t ret;
-        __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
-        return ret;
-}
-
-#define KBD_DATA_PORT 0x60
-#define KBD_STATUS_PORT 0x64
-
 #define CURSOR_SIZE 10
 
-static uint8_t scancode_to_ascii[128] = {
-        0,  27, '1', '2', '3', '4', '5', '6',  // 0x00 - 0x07
-        '7', '8', '9', '0', '-', '=', '\b',    // 0x08 - 0x0E Backspace
-        '\t',                                  // 0x0F Tab
-        'q', 'w', 'e', 'r',                    // 0x10 - 0x13
-        't', 'y', 'u', 'i',                    // 0x14 - 0x17
-        'o', 'p', '[', ']', '\n',              // 0x18 - 0x1C Enter
-        0,                                    // 0x1D Control
-        'a', 's', 'd', 'f',                    // 0x1E - 0x21
-        'g', 'h', 'j', 'k',                    // 0x22 - 0x25
-        'l', ';', '\'', '`', 0,                // 0x26 - 0x2A Left shift
-        '\\', 'z', 'x', 'c',                   // 0x2B - 0x2E
-        'v', 'b', 'n', 'm',                    // 0x2F - 0x32
-        ',', '.', '/', 0,                      // 0x33 - 0x36 Right shift
-        '*', 0, ' ',                          // 0x37 - 0x39 Spacebar
-};
+
 
 static inline uint16_t vga_entry(unsigned char c, uint8_t color)
 {
@@ -150,23 +120,9 @@ void tty_move_cursor(size_t row, size_t col)
         outb(0x3D5, pos & 0xFF);
 }
 
-char get_ascii_from_scancode(uint8_t sc)
-{
-        if (sc > 127) return 0;
-                return scancode_to_ascii[sc];
-}
 
-void keyboard_handler()
-{
-        uint8_t status = inb(KBD_STATUS_PORT);
-        if (status & 0x01) {
-                uint8_t scancode = inb(KBD_DATA_PORT);
-                char c = get_ascii_from_scancode(scancode);
-                if (c) {
-                        kputchar(c);
-                }
-        }
-}
+
+
 
 void int_to_str(int num, char *str)
 {

@@ -38,4 +38,3 @@ SECTIONS
         __heap_end = .;
     } > RAM
 }
-

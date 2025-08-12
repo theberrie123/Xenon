@@ -9,9 +9,16 @@ typedef unsigned long long uint64_t;
 
 typedef unsigned int size_t;
 
+typedef unsigned int uintptr_t;
+
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
+
+typedef enum {
+        BOOL_FALSE = 0,
+        BOOL_TRUE  = 1
+} bool_t;
 
 
 #endif
