@@ -1,6 +1,8 @@
 #include "../include/idt.h"
 #include "../include/type.h"
 #include "../include/irq.h"
+#include "../include/tty.h"
+
 
 #define IDT_SIZE 256
 
@@ -129,8 +131,11 @@ static void idt_set_entry(uint8_t vector, void* isr, uint8_t flags) {
 void idt_init(void) {
         idtr.base = (uint32_t)&idt[0];
         idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
+
+        idt_set_entry(32, irq0_handler, 0x8E);
         idt_set_entry(33, irq1_handler, 0x8E);
 
         __asm__ volatile ("lidt %0" : : "m"(idtr));
-}
 
+        kprintf("[  OK  ] Initialized IDT...\n");
+}

@@ -1,27 +1,62 @@
 #include "../include/io.h"
 #include "../include/pit.h"
-
 #include "../include/type.h"
+#include "../include/tty.h"
 
-volatile uint64_t pit_ticks = 0;
 
-void pit_irq_handler(void) {
-    pit_ticks++;
-    // Send EOI to PIC
-    outb(0x20, 0x20);
+/* number of PIT ticks since boot */
+static volatile uint64_t jiffies = 0;
+
+static uint32_t pit_hz = 100; /* default */
+
+void pit_set_frequency(uint32_t frequency_hz)
+{
+        if (frequency_hz == 0) {
+                return;
+        }
+
+        /* divisor calc with rounding: (input + f/2)/f */
+        uint32_t divisor = (PIT_INPUT_FREQ + frequency_hz/2) / frequency_hz;
+        if (divisor == 0) {
+                divisor = 1;
+        }
+        if (divisor > 0xFFFF) {
+                divisor = 0xFFFF;
+        }
+
+        /* command byte:
+        *       00 11 011 0
+        *       bits 7-6: select channel (00 = channel 0)
+        *       bits 5-4: access mode (11 = lobyte/hibyte)
+        *       bits 3-1: mode (011 = mode 3 square wave)
+        *       bit 0: BCD (0 = 16-bit binary)
+        */
+        outb(PIT_COMMAND_PORT, 0x36); /* 0x36 = 00 11 011 0 */
+        uint8_t lo = divisor & 0xFE;
+        uint8_t hi = (divisor >> 8) & 0xFF;
+        outb(PIT_CHANNEL0_PORT, lo);
+        outb(PIT_CHANNEL0_PORT, hi);
+
+        pit_hz = frequency_hz;
 }
 
-uint32_t pit_get_ticks() {
-    return pit_ticks;
+void pit_init(uint32_t frequency_hz)
+{
+        pit_set_frequency(frequency_hz);
+
+        kprintf("[  OK  ] Initialized PIT with %d Hz...\n", frequency_hz);
+
 }
 
+uint64_t get_jiffies()
+{
+        uint64_t v;
+        v = jiffies;
+        return v;
+}
 
-void pit_init(uint32_t frequency) {
-    uint32_t divisor = 1193180 / frequency;
-    // Command port: channel 0, lobyte/hibyte, mode 3 (square wave)
-    outb(0x43, 0x36);
-    // Send low byte
-    outb(0x40, divisor & 0xFF);
-    // Send high byte
-    outb(0x40, (divisor >> 8) & 0xFF);
+void msleep(uint32_t ms)
+{
+        uint64_t start = get_jiffies();
+        uint64_t ticks_to_wait = (ms * pit_hz + 999) / 1000;
 }

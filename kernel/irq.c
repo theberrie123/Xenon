@@ -1,16 +1,33 @@
-void timer_tick(void)
-{
+#include "../include/type.h"
 
+
+volatile uint64_t jiffies = 0;
+
+void pit_tick(void) {
+    jiffies++;
+    // scheduler/timer code here
 }
 
-void irq0_handler(void) __attribute__((naked));
+__attribute__((naked))
 void irq0_handler(void) {
-    asm volatile (
-        "pusha\n\t"               // save registers
-        "call timer_tick\n\t"     // call your timer tick function (implement)
-        "movb $0x20, %al\n\t"     // send EOI to PIC1
+    __asm__ volatile (
+        "cli\n\t"               // clear interrupts
+        "push %eax\n\t"
+        "push %ebx\n\t"
+        "push %ecx\n\t"
+        "push %edx\n\t"
+        "push %esi\n\t"
+        "push %edi\n\t"
+        "call pit_tick\n\t"
+        "pop %edi\n\t"
+        "pop %esi\n\t"
+        "pop %edx\n\t"
+        "pop %ecx\n\t"
+        "pop %ebx\n\t"
+        "pop %eax\n\t"
+        "mov $0x20, %al\n\t"    // EOI
         "outb %al, $0x20\n\t"
-        "popa\n\t"
+        "sti\n\t"
         "iret\n\t"
     );
 }

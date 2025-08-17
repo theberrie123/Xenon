@@ -7,6 +7,7 @@
 #include "../include/irq.h"
 #include "../include/interrupts.h"
 #include "../include/fs.h"
+#include "../include/pit.h"
 
 
 #define INPUT_BUFFER_SIZE 256
@@ -39,14 +40,16 @@ void disable_interrupts()
 
 void kmain()
 {
+        kinit();
         gdt_init();
         idt_init();
         pic_remap(0x20, 0x28);
         pic_set_mask(0xFD, 0xFF);
 
+        pit_init(100);
+
         __asm__ volatile ("sti");
 
-        kinit();
         kprintf("Loaded kernel...\n");
 
         init_root_fs();
