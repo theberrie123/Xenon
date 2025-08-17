@@ -6,6 +6,7 @@
 #include "../include/pic.h"
 #include "../include/irq.h"
 #include "../include/interrupts.h"
+#include "../include/fs.h"
 
 
 #define INPUT_BUFFER_SIZE 256
@@ -41,33 +42,17 @@ void kmain()
         gdt_init();
         idt_init();
         pic_remap(0x20, 0x28);
-
         pic_set_mask(0xFD, 0xFF);
 
         __asm__ volatile ("sti");
 
-
         kinit();
-        kprintf("Xenon Lithium 1.0.0 (tty)\n\n");
-        kprintf("root@xenoniso ~ # ");
+        kprintf("Loaded kernel...\n");
 
-    while (1) {
-        int c = keyboard_get_char();
-        if (c != -1) {
-            if (c == '\r' || c == '\n') {
-                input_buffer[input_pos] = '\0'; // terminate string
-                kprintf("\nYou typed: %s\n", input_buffer);
-                input_pos = 0;
-                kprintf("root@xenoniso ~ # ");
-            } else if (c == '\b') {
-                if (input_pos > 0) {
-                    input_pos--;
-                    kputchar('\b');
-                }
-            } else if (input_pos < INPUT_BUFFER_SIZE - 1) {
-                input_buffer[input_pos++] = (char)c;
-                kputchar((char)c);
-            }
-        }
-    }
+        init_root_fs();
+        kprintf("Filesystem initialized...\n");
+
+        list_dir(root_inode);
+
+        while (1) { }
 }

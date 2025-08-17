@@ -212,3 +212,10 @@ void kprintf(const char *format, ...)
 
         va_end(args);
 }
+
+void kexit(int code)
+{
+        while (1) {
+                __asm__ __volatile__("hlt");
+        }
+}

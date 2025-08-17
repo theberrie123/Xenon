@@ -113,7 +113,6 @@ void (*isr_stubs[32])(void) = {
 };
 
 
-
 /* IDT set descriptor function */
 static void idt_set_entry(uint8_t vector, void* isr, uint8_t flags) {
     uintptr_t addr = (uintptr_t)isr;
@@ -126,11 +125,12 @@ static void idt_set_entry(uint8_t vector, void* isr, uint8_t flags) {
     desc->isr_high = (addr >> 16) & 0xFFFF;
 }
 
+
 void idt_init(void) {
-    idtr.base = (uint32_t)&idt[0];
-    idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
+        idtr.base = (uint32_t)&idt[0];
+        idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
         idt_set_entry(33, irq1_handler, 0x8E);
 
-    __asm__ volatile ("lidt %0" : : "m"(idtr));
+        __asm__ volatile ("lidt %0" : : "m"(idtr));
 }
 

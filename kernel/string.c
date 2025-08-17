@@ -51,3 +51,36 @@ char *strcat(char *dest, const char *src)
 
         return ret;
 }
+
+
+
+void *memset(void *dest, int value, unsigned int count)
+{
+        unsigned char *ptr = (unsigned char *)dest;
+        for (unsigned int i = 0; i < count; i++) {
+                ptr[i] = (unsigned char)value;
+        }
+        return dest;
+}
+
+void *memcpy(void *dest, const void *src, unsigned int count)
+{
+        unsigned char *d = (unsigned char *)dest;
+        const unsigned char *s = (const unsigned char *)src;
+        for (unsigned int i = 0; i < count; i++) {
+                d[i] = s[i];
+        }
+        return dest;
+}
+
+char *strncpy(char *dest, const char *src, unsigned int n)
+{
+        unsigned int i;
+        for (i = 0; i < n && src[i] != '\0'; i++) {
+                dest[i] = src[i];
+        }
+        for (; i < n; i++) {
+                dest[i] = '\0';
+        }
+        return dest;
+}
