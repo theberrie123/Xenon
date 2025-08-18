@@ -44,7 +44,7 @@ int create_dir(int parent_inode, const char *name);
 
 extern int root_inode;
 
-void init_root_fs();
+void init_fs();
 void list_dir(int inode_idx);
 
 #endif

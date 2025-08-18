@@ -6,13 +6,8 @@
 #include "../include/pic.h"
 #include "../include/fs.h"
 #include "../include/pit.h"
-
-
-
-void pic_set_mask(uint8_t mask1, uint8_t mask2) {
-    outb(0x21, mask1); // Master PIC data port
-    outb(0xA1, mask2); // Slave PIC data port
-}
+#include "../include/isr.h"
+#include "../include/paging.h"
 
 
 #define VGA_MEMORY (uint16_t*)0xB8000
@@ -36,19 +31,15 @@ void kmain()
         kinit();
         gdt_init();
         idt_init();
-        pic_remap(0x20, 0x28);
-        pic_set_mask(0xFD, 0xFF);
-
+        isr_init();
+        pic_init();
         pit_init(100);
+
+        init_fs();
 
         __asm__ volatile ("sti");
 
-        kprintf("Loaded kernel...\n");
-
-        init_root_fs();
-        kprintf("Filesystem initialized...\n");
-
-        list_dir(root_inode);
+        /* list_dir(root_inode); */
 
         while (1) { }
 }

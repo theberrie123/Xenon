@@ -15,6 +15,8 @@
 #define PIC_EOI 0x20 // End-of-interrupt command code
 
 
+void pic_init();
+void pic_set_mask(uint8_t mask1, uint8_t mask2);
 void pic_remap(int offset1, int offset2);
 
 

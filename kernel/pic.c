@@ -1,5 +1,6 @@
 #include "../include/pic.h"
 #include "../include/io.h"
+#include "../include/tty.h"
 
 
 void pic_remap(int offset1, int offset2)
@@ -23,4 +24,18 @@ void pic_remap(int offset1, int offset2)
 
         outb(PIC1_DATA, a1);
         outb(PIC2_DATA, a2);
+}
+
+void pic_set_mask(uint8_t mask1, uint8_t mask2)
+{
+        outb(0x21, mask1);
+        outb(0xA1, mask2);
+}
+
+void pic_init()
+{
+        pic_remap(0x20, 0x28);
+        pic_set_mask(0xFC, 0xFF);
+
+        kprintf("[  %%gOK%%w  ] Initialized PIC...\n");
 }

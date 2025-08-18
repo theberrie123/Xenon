@@ -112,7 +112,7 @@ void list_dir(int inode_idx)
         }
 }
 
-void init_root_fs() {
+void init_fs() {
     memset(disk, 0, sizeof(disk));
     memset(block_bitmap, 0, sizeof(block_bitmap));
     memset(inode_bitmap, 0, sizeof(inode_bitmap));
@@ -123,6 +123,8 @@ void init_root_fs() {
     create_dir(root_inode, "dev");
     create_dir(root_inode, "etc");
     create_dir(root_inode, "home");
+
+        kprintf("[  %%gOK%%w  ] Initialized FS...\n");
 
     // Add a test file
     uint8_t data[1024]; for(int i=0;i<1024;i++) data[i]=i%256;

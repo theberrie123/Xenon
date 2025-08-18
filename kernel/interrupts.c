@@ -11,15 +11,6 @@ static volatile uint32_t buffer_head = 0;
 static volatile uint32_t buffer_tail = 0;
 
 
-void isr_handler_c()
-{
-        __asm__ __volatile__ ("cli; hlt");
-}
-
-
-void irq0_c(void) {
-    // Timer IRQ placeholder
-}
 
 void keyboard_buffer_put(uint8_t scancode) {
     uint32_t next = (buffer_head + 1) % BUFFER_SIZE;

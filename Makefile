@@ -41,24 +41,27 @@ $(KERNEL): $(BOOTOBJ) $(COBJS) | $(BUILDDIR_BIN)
 
 $(GRUBDIR)/grub.cfg: | $(GRUBDIR)
 	@test -f $@ || { \
-	  echo 'set timeout=0' > $@; \
-	  echo 'set default=0' >> $@; \
-	  echo 'menuentry "Xenon" {' >> $@; \
-	  echo '  multiboot /boot/kernel.elf' >> $@; \
-	  echo '  boot' >> $@; \
-	  echo '}' >> $@; }
+	 echo 'set timeout=0' > $@; \
+	 echo 'set default=0' >> $@; \
+	 echo 'menuentry "Xenon" {' >> $@; \
+	 echo '  multiboot /boot/kernel.elf' >> $@; \
+	 echo '  boot' >> $@; \
+	 echo '}' >> $@; }
 
 $(ISO): $(KERNEL) $(GRUBDIR)/grub.cfg | $(BUILDDIR_BIN)
-	cp -u $(KERNEL) $(BUILDDIR_BOOT)/
+	cp $(KERNEL) $(BUILDDIR_BOOT)/
 	grub-mkrescue -o $@ build
 
 clean:
 	rm -rf build
 
 run: $(ISO)
-	$(MAKE) -j$(nproc) $(ISO)
 	$(QEMU) -cdrom $(ISO)
+
+cores:
+	$(MAKE) -j$$(nproc)
 
 -include $(COBJS:.o=.d)
 
-.PHONY: all clean run
+.PHONY: all clean run cores
+
