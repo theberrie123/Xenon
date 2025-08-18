@@ -4,7 +4,7 @@
 #include "type.h"
 
 
-void isr_handler_c(uint32_t int_no, uint32_t err_code);
+void isr_handler_c();
 void irq0_c(void);
 void irq1_c(void);
 

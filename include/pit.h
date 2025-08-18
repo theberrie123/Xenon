@@ -13,7 +13,5 @@ void pit_init(uint32_t frequency_hz);
 void pit_set_frequency(uint32_t frequency_hz);
 uint64_t get_jiffies();
 void pit_irq_handler();
-void msleep(uint32_t ms);
-
 
 #endif

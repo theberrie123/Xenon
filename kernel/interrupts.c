@@ -10,10 +10,12 @@ static volatile uint8_t keyboard_buffer[BUFFER_SIZE];
 static volatile uint32_t buffer_head = 0;
 static volatile uint32_t buffer_tail = 0;
 
-void isr_handler_c(uint32_t int_no, uint32_t err_code) {
-    // For now just halt CPU on exceptions
-    asm volatile ("cli; hlt");
+
+void isr_handler_c()
+{
+        __asm__ __volatile__ ("cli; hlt");
 }
+
 
 void irq0_c(void) {
     // Timer IRQ placeholder

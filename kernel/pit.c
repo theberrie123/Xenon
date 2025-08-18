@@ -44,7 +44,7 @@ void pit_init(uint32_t frequency_hz)
 {
         pit_set_frequency(frequency_hz);
 
-        kprintf("[  OK  ] Initialized PIT with %d Hz...\n", frequency_hz);
+        kprintf("[  %%gOK%%w  ] Initialized PIT with %d Hz...\n", frequency_hz);
 
 }
 
@@ -53,10 +53,4 @@ uint64_t get_jiffies()
         uint64_t v;
         v = jiffies;
         return v;
-}
-
-void msleep(uint32_t ms)
-{
-        uint64_t start = get_jiffies();
-        uint64_t ticks_to_wait = (ms * pit_hz + 999) / 1000;
 }

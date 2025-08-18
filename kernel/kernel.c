@@ -4,15 +4,8 @@
 #include "../include/io.h"
 #include "../include/gdt.h"
 #include "../include/pic.h"
-#include "../include/irq.h"
-#include "../include/interrupts.h"
 #include "../include/fs.h"
 #include "../include/pit.h"
-
-
-#define INPUT_BUFFER_SIZE 256
-static char input_buffer[INPUT_BUFFER_SIZE];
-static int input_pos = 0;
 
 
 

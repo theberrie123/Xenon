@@ -2,7 +2,8 @@ AS = as
 ASFLAGS = -32
 
 CC = gcc
-CFLAGS = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie -Wall -Wextra -Iinclude -c
+CFLAGS = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+         -Wall -Wextra -Iinclude -c -MMD -MP
 
 LD = ld
 LDFLAGS = -m elf_i386 -T linker.ld
@@ -18,45 +19,46 @@ GRUBDIR = $(BUILDDIR_BOOT)/grub
 ISO = $(BUILDDIR_BIN)/os.iso
 
 CFILES := $(wildcard $(SRCDIR)/*.c)
-
 COBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR_OBJ)/%.o,$(CFILES))
-
 BOOTOBJ = $(BUILDDIR_OBJ)/boot.o
-
 KERNEL = $(BUILDDIR_BIN)/kernel.elf
+
+DIRS = $(BUILDDIR_OBJ) $(BUILDDIR_BIN) $(BUILDDIR_BOOT) $(GRUBDIR)
 
 all: $(ISO)
 
-$(BOOTOBJ): $(SRCDIR)/boot.s
-	mkdir -p $(BUILDDIR_OBJ)
+$(DIRS):
+	@mkdir -p $@
+
+$(BOOTOBJ): $(SRCDIR)/boot.s | $(BUILDDIR_OBJ)
 	$(AS) $(ASFLAGS) $< -o $@
 
-$(BUILDDIR_OBJ)/%.o: $(SRCDIR)/%.c
-	mkdir -p $(BUILDDIR_OBJ)
+$(BUILDDIR_OBJ)/%.o: $(SRCDIR)/%.c | $(BUILDDIR_OBJ)
 	$(CC) $(CFLAGS) $< -o $@
 
-$(KERNEL): $(BOOTOBJ) $(COBJS)
-	mkdir -p $(BUILDDIR_BIN)
+$(KERNEL): $(BOOTOBJ) $(COBJS) | $(BUILDDIR_BIN)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-$(GRUBDIR)/grub.cfg:
-	mkdir -p $(GRUBDIR)
-	echo 'set timeout=0' > $(GRUBDIR)/grub.cfg
-	echo 'set default=0' >> $(GRUBDIR)/grub.cfg
-	echo 'menuentry "Lithium" {' >> $(GRUBDIR)/grub.cfg
-	echo '  multiboot /boot/kernel.elf' >> $(GRUBDIR)/grub.cfg
-	echo '  boot' >> $(GRUBDIR)/grub.cfg
-	echo '}' >> $(GRUBDIR)/grub.cfg
+$(GRUBDIR)/grub.cfg: | $(GRUBDIR)
+	@test -f $@ || { \
+	  echo 'set timeout=0' > $@; \
+	  echo 'set default=0' >> $@; \
+	  echo 'menuentry "Xenon" {' >> $@; \
+	  echo '  multiboot /boot/kernel.elf' >> $@; \
+	  echo '  boot' >> $@; \
+	  echo '}' >> $@; }
 
-$(ISO): $(KERNEL) $(GRUBDIR)/grub.cfg
-	cp $(KERNEL) $(BUILDDIR_BOOT)/
+$(ISO): $(KERNEL) $(GRUBDIR)/grub.cfg | $(BUILDDIR_BIN)
+	cp -u $(KERNEL) $(BUILDDIR_BOOT)/
 	grub-mkrescue -o $@ build
 
 clean:
 	rm -rf build
 
 run: $(ISO)
-	$(QEMU) -cdrom $<
+	$(MAKE) -j$(nproc) $(ISO)
+	$(QEMU) -cdrom $(ISO)
+
+-include $(COBJS:.o=.d)
 
 .PHONY: all clean run
-

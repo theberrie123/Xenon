@@ -102,7 +102,7 @@ void list_dir(int inode_idx)
         ext4_dir_entry_t *entries = (ext4_dir_entry_t*)disk[dir->i_block[0]];
         kprintf("Directory contents (%d entries):\n", dir->i_size);
 
-        for (int i = 0; i < dir->i_size; i++) {
+        for (uint32_t i = 0; i < dir->i_size; i++) {
                 ext4_inode_t *e_inode = &inode_table[entries[i].inode];
                 if (e_inode->i_type == 1) {
                         kprintf("[DIR]  %s\n", entries[i].name);

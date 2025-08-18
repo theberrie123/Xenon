@@ -35,5 +35,5 @@ void gdt_init() {
                 : : : "ax"
         );
 
-        kprintf("[  OK  ] Initialized GDT...\n");
+        kprintf("[  %%gOK%%w  ] Initialized GDT...\n");
 }

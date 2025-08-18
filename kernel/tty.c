@@ -97,9 +97,9 @@ void kputchar(char c)
 }
 
 
-void tty_set_color(uint8_t fg, uint8_t bg)
+void tty_set_color(uint8_t color)
 {
-        KCOLOR = (bg << 4) | (fg & 0x0F);
+        KCOLOR = color;
 }
 
 void tty_move_cursor(size_t row, size_t col)
@@ -169,6 +169,18 @@ void kprintf(const char *format, ...)
         va_start(args, format);
 
         for (const char *p = format; *p != '\0'; p++) {
+                if (*p == '%' && *(p+1) == '%') {
+                        p += 2;
+                        switch (*p) {
+                                case 'g': tty_set_color(GREEN_ON_BLACK); break;
+                                case 'w': tty_set_color(WHITE_ON_BLACK); break;
+                                case 'y': tty_set_color(YELLOW_ON_BLACK); break;
+                                case 'r': tty_set_color(RED_ON_BLACK); break;
+                                default: break;
+                        }
+                        continue;
+                }
+
                 if (*p == '%') {
                         p++;
                         switch (*p) {
@@ -211,11 +223,4 @@ void kprintf(const char *format, ...)
         }
 
         va_end(args);
-}
-
-void kexit(int code)
-{
-        while (1) {
-                __asm__ __volatile__("hlt");
-        }
 }
