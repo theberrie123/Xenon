@@ -4,7 +4,6 @@
 #include "../include/io.h"
 #include "../include/gdt.h"
 #include "../include/pic.h"
-#include "../include/fs.h"
 #include "../include/pit.h"
 #include "../include/isr.h"
 #include "../include/paging.h"
@@ -35,11 +34,8 @@ void kmain()
         pic_init();
         pit_init(100);
 
-        init_fs();
 
         __asm__ volatile ("sti");
-
-        /* list_dir(root_inode); */
 
         while (1) { }
 }

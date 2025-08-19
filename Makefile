@@ -3,7 +3,7 @@ ASFLAGS = -32
 
 CC = gcc
 CFLAGS = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
-         -Wall -Wextra -Iinclude -c -MMD -MP
+         -Wall -Wextra -Iinclude -Iarch/x86/include -c -MMD -MP
 
 LD = ld
 LDFLAGS = -m elf_i386 -T linker.ld
@@ -11,6 +11,7 @@ LDFLAGS = -m elf_i386 -T linker.ld
 QEMU = qemu-system-x86_64
 
 SRCDIR = kernel
+ARCHDIR = arch
 BUILDDIR_OBJ = build/obj
 BUILDDIR_BIN = build/bin
 BUILDDIR_BOOT = build/boot
@@ -30,7 +31,7 @@ all: $(ISO)
 $(DIRS):
 	@mkdir -p $@
 
-$(BOOTOBJ): $(SRCDIR)/boot.s | $(BUILDDIR_OBJ)
+$(BOOTOBJ): $(ARCHDIR)/x86/boot/boot.s | $(BUILDDIR_OBJ)
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(BUILDDIR_OBJ)/%.o: $(SRCDIR)/%.c | $(BUILDDIR_OBJ)
