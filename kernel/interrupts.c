@@ -12,11 +12,12 @@ static volatile uint32_t buffer_tail = 0;
 
 
 
-void keyboard_buffer_put(uint8_t scancode) {
-    uint32_t next = (buffer_head + 1) % BUFFER_SIZE;
-    if (next != buffer_tail) { // avoid overflow
-        keyboard_buffer[buffer_head] = scancode;
-        buffer_head = next;
+void keyboard_buffer_put(uint8_t scancode)
+{
+        uint32_t next = (buffer_head + 1) % BUFFER_SIZE;
+        if (next != buffer_tail) { // avoid overflow
+                keyboard_buffer[buffer_head] = scancode;
+                buffer_head = next;
     }
 }
 

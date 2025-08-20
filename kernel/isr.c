@@ -11,14 +11,16 @@
 static isr_handler_t interrupt_handlers[ISR_COUNT] = {0};
 
 // Called by asm stubs
-void isr_handler_c(registers_t *regs) {
+void isr_handler_c(registers_t *regs)
+{
     if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no])
         interrupt_handlers[regs->int_no](regs);
     else
         kprintf("Unhandled interrupt: %d, err: %x\n", regs->int_no, regs->err_code);
 }
 
-void isr_register_handler(uint8_t n, isr_handler_t handler) {
+void isr_register_handler(uint8_t n, isr_handler_t handler)
+{
     if (n < ISR_COUNT)
         interrupt_handlers[n] = handler;
 }

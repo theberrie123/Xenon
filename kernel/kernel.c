@@ -35,7 +35,7 @@ void kmain()
         pit_init(100);
 
 
-        __asm__ volatile ("sti");
+        __asm__ __volatile__ ("sti");
 
         while (1) { }
 }
