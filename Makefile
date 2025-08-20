@@ -56,13 +56,10 @@ $(ISO): $(KERNEL) $(GRUBDIR)/grub.cfg | $(BUILDDIR_BIN)
 clean:
 	rm -rf build
 
-run: $(ISO)
-	$(QEMU) -cdrom $(ISO)
-
-cores:
+build: $(ISO)
 	$(MAKE) -j$$(nproc)
+	$(QEMU) -cdrom $(ISO)
 
 -include $(COBJS:.o=.d)
 
-.PHONY: all clean run cores
-
+.PHONY: all clean build
