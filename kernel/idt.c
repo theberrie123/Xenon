@@ -13,20 +13,20 @@ static struct idtr idtr;
 #define ISR_NO_ERR_STUB(n)                    \
 void isr_stub_##n(void) __attribute__((naked)); \
 void isr_stub_##n(void) {                      \
-    asm volatile (                             \
-        "pushl $0\n\t"                        \
-        "pushl $" #n "\n\t"                   \
-        "jmp isr_handler_c\n\t"               \
-    );                                        \
+        __asm__ __volatile__ (                             \
+                "pushl $0\n\t"                        \
+                "pushl $" #n "\n\t"                   \
+                "jmp isr_handler_c\n\t"               \
+        );                                        \
 }
 
 #define ISR_ERR_STUB(n)                       \
 void isr_stub_##n(void) __attribute__((naked)); \
 void isr_stub_##n(void) {                      \
-    asm volatile (                             \
-        "pushl $" #n "\n\t"                    \
-        "jmp isr_handler_c\n\t"               \
-    );                                        \
+        __asm__ __volatile__ (                             \
+                "pushl $" #n "\n\t"                    \
+                "jmp isr_handler_c\n\t"               \
+        );                                        \
 }
 
 /* Define the 32 CPU exception stubs */
@@ -104,31 +104,33 @@ extern void irq0_c(void);
 extern void irq1_c(void);
 
 void (*isr_stubs[32])(void) = {
-    isr_stub_0,  isr_stub_1,  isr_stub_2,  isr_stub_3,
-    isr_stub_4,  isr_stub_5,  isr_stub_6,  isr_stub_7,
-    isr_stub_8,  isr_stub_9,  isr_stub_10, isr_stub_11,
-    isr_stub_12, isr_stub_13, isr_stub_14, isr_stub_15,
-    isr_stub_16, isr_stub_17, isr_stub_18, isr_stub_19,
-    isr_stub_20, isr_stub_21, isr_stub_22, isr_stub_23,
-    isr_stub_24, isr_stub_25, isr_stub_26, isr_stub_27,
-    isr_stub_28, isr_stub_29, isr_stub_30, isr_stub_31
+        isr_stub_0,  isr_stub_1,  isr_stub_2,  isr_stub_3,
+        isr_stub_4,  isr_stub_5,  isr_stub_6,  isr_stub_7,
+        isr_stub_8,  isr_stub_9,  isr_stub_10, isr_stub_11,
+        isr_stub_12, isr_stub_13, isr_stub_14, isr_stub_15,
+        isr_stub_16, isr_stub_17, isr_stub_18, isr_stub_19,
+        isr_stub_20, isr_stub_21, isr_stub_22, isr_stub_23,
+        isr_stub_24, isr_stub_25, isr_stub_26, isr_stub_27,
+        isr_stub_28, isr_stub_29, isr_stub_30, isr_stub_31
 };
 
 
 /* IDT set descriptor function */
-void idt_set_entry(uint8_t vector, void* isr, uint8_t flags) {
-    uintptr_t addr = (uintptr_t)isr;
-    struct idt_entry* desc = &idt[vector];
+void idt_set_entry(uint8_t vector, void *isr, uint8_t flags)
+{
+        uintptr_t addr = (uintptr_t)isr;
+        struct idt_entry* desc = &idt[vector];
 
-    desc->isr_low = addr & 0xFFFF;
-    desc->kernel_cs = 0x08;
-    desc->reserved = 0;
-    desc->attributes = flags;
-    desc->isr_high = (addr >> 16) & 0xFFFF;
+        desc->isr_low = addr & 0xFFFF;
+        desc->kernel_cs = 0x08;
+        desc->reserved = 0;
+        desc->attributes = flags;
+        desc->isr_high = (addr >> 16) & 0xFFFF;
 }
 
 
-void idt_init(void) {
+void idt_init()
+{
         idtr.base = (uint32_t)&idt[0];
         idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
 
