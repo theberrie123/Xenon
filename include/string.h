@@ -2,7 +2,7 @@
 #define STRING_H
 
 
-#include "type.h"
+#include <xenon/type.h>
 
 
 size_t strlen(const char *str);
@@ -14,4 +14,4 @@ void *memset(void *dest, int value, size_t count);
 void *memcpy(void *dest, const void *src, size_t count);
 char *strncpy(char *dest, const char *src, size_t n);
 
-#endif
+#endif /* STRING_H */

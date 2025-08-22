@@ -1,7 +1,9 @@
 #ifndef PIT_H
 #define PIT_H
 
-#include "type.h"
+
+#include <xenon/type.h>
+
 
 
 #define PIT_CHANNEL0_PORT       0x40
@@ -14,4 +16,4 @@ void pit_set_frequency(uint32_t frequency_hz);
 uint64_t get_jiffies();
 void pit_irq_handler();
 
-#endif
+#endif /* PIT_H */

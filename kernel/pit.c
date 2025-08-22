@@ -1,11 +1,10 @@
 #include "../include/io.h"
 #include "../include/pit.h"
-#include "../include/type.h"
 #include "../include/tty.h"
 
 
 /* number of PIT ticks since boot */
-static volatile uint64_t jiffies = 0;
+static __volatile__ uint64_t jiffies = 0;
 
 static uint32_t pit_hz = 100; /* default */
 

@@ -1,6 +1,5 @@
 #include "../include/isr.h"
 #include "../include/paging.h"
-#include "../include/type.h"
 #include "../include/tty.h"
 #include "../include/idt.h"
 

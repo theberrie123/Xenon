@@ -2,8 +2,7 @@
 #define GDT_H
 
 
-#include "../include/type.h"
-
+#include <xenon/type.h>
 
 /* GDT entry struct */
 struct gdt_entry {

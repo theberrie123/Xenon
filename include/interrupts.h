@@ -1,15 +1,18 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
 
-#include "type.h"
+
+#include <xenon/type.h>
 
 
-void isr_handler_c();
-void irq0_c(void);
-void irq1_c(void);
+void irq0_c();
+void irq1_c();
 
-int keyboard_get_char(void);
-
+int keyboard_get_char();
 
 
-#endif
+void enable_interrupts();
+void disable_interrupts();
+
+
+#endif /* INTERRUPTS_H */

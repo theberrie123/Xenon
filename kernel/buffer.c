@@ -1,5 +1,4 @@
 #include "../include/buffer.h"
-#include "../include/type.h"
 #include "../include/tty.h"
 #include "../include/memory.h"
 

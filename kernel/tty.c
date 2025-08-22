@@ -1,5 +1,4 @@
 #include "../include/tty.h"
-#include "../include/type.h"
 #include "../include/string.h"
 #include "../include/io.h"
 
@@ -10,7 +9,7 @@ typedef __builtin_va_list va_list;
 
 unsigned int *framebuffer = (unsigned int *)0xB8000;
 
-static volatile uint16_t* VGA_MEMORY = (volatile uint16_t*)0xB8000;
+static __volatile__ uint16_t* VGA_MEMORY = (__volatile__ uint16_t*)0xB8000;
 
 static int cursor_row;
 static int cursor_col;
@@ -29,8 +28,6 @@ int cursor_x = 0;
 int cursor_y = 0;
 int screen_width = 1024;
 int screen_height = 768;
-
-unsigned int* framebuffer;
 
 
 void tty_move_cursor(size_t row, size_t col);
@@ -54,7 +51,7 @@ static void kscroll()
         cursor_row = VGA_HEIGHT - 1;
 }
 
-void kinit(void)
+void kinit()
 {
         cursor_row = 0;
         cursor_col = 0;
@@ -87,7 +84,6 @@ void kputchar(char c)
                         cursor_row++;
                 }
         }
-
         if (cursor_row >= VGA_HEIGHT) {
                 kscroll();
                 cursor_row = VGA_HEIGHT - 1;
@@ -119,9 +115,6 @@ void tty_move_cursor(size_t row, size_t col)
         outb(0x3D4, 0x0F);
         outb(0x3D5, pos & 0xFF);
 }
-
-
-
 
 
 void int_to_str(int num, char *str)

@@ -2,7 +2,7 @@
 #define BUFFER_H
 
 
-#include "type.h"
+#include <xenon/type.h>
 
 struct Buffer {
         char *data;

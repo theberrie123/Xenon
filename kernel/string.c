@@ -1,5 +1,4 @@
 #include "../include/string.h"
-#include "../include/type.h"
 
 
 size_t strlen(const char *str)
@@ -54,7 +53,7 @@ char *strcat(char *dest, const char *src)
 
 
 
-void *memset(void *dest, int value, unsigned int count)
+void *memset(void *dest, int value, size_t count)
 {
         unsigned char *ptr = (unsigned char *)dest;
         for (unsigned int i = 0; i < count; i++) {
@@ -63,7 +62,7 @@ void *memset(void *dest, int value, unsigned int count)
         return dest;
 }
 
-void *memcpy(void *dest, const void *src, unsigned int count)
+void *memcpy(void *dest, const void *src, size_t count)
 {
         unsigned char *d = (unsigned char *)dest;
         const unsigned char *s = (const unsigned char *)src;
@@ -73,7 +72,7 @@ void *memcpy(void *dest, const void *src, unsigned int count)
         return dest;
 }
 
-char *strncpy(char *dest, const char *src, unsigned int n)
+char *strncpy(char *dest, const char *src, size_t n)
 {
         unsigned int i;
         for (i = 0; i < n && src[i] != '\0'; i++) {

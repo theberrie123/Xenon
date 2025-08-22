@@ -1,5 +1,4 @@
 #include "../include/paging.h"
-#include "../include/type.h"
 #include "../include/tty.h"
 #include "../include/isr.h"
 
@@ -98,22 +97,22 @@ void paging_init_identity_4mb(void) {
 }
 
 void page_fault_isr(uint32_t err_code) {
-    uintptr_t fault_addr = read_cr2();
+        uintptr_t fault_addr = read_cr2();
 
-    int present   = !(err_code & 0x1); // 0 = not-present
-    int rw        = err_code & 0x2;
-    int us        = err_code & 0x4;
-    int reserved  = err_code & 0x8;
-    int instr_fetch = err_code & 0x10; // if supported
+        int present   = !(err_code & 0x1); // 0 = not-present
+        int rw        = err_code & 0x2;
+        int us        = err_code & 0x4;
+        int reserved  = err_code & 0x8;
+        int instr_fetch = err_code & 0x10; // if supported
 
-    kprintf("Page fault @%p | %s | %s | %s | %s | %s\n",
-            (void*)fault_addr,
-            present ? "not-present" : "present",
-            rw ? "write" : "read",
-            us ? "user" : "kernel",
-            reserved ? "reserved" : "ok",
-            instr_fetch ? "ifetch" : "data");
+        kprintf("Page fault @%p | %s | %s | %s | %s | %s\n",
+                (void*)fault_addr,
+                present ? "not-present" : "present",
+                rw ? "write" : "read",
+                us ? "user" : "kernel",
+                reserved ? "reserved" : "ok",
+                instr_fetch ? "ifetch" : "data");
 
-    // For now: halt. Later you can allocate a page on-demand, kill task, etc.
-    asm volatile("cli; hlt");
+        // For now: halt. Later you can allocate a page on-demand, kill task, etc.
+        __asm__ __volatile__ ("cli; hlt");
 }

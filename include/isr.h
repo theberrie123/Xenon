@@ -1,7 +1,9 @@
 #ifndef ISR_H
 #define ISR_H
 
-#include "type.h"
+
+#include <xenon/type.h>
+
 
 typedef struct registers {
     uint32_t ds;
@@ -16,5 +18,4 @@ void isr_init();
 void isr_register_handler(uint8_t n, isr_handler_t handler);
 void isr_handler_c(registers_t *regs);
 
-#endif
-
+#endif /* ISR_H */

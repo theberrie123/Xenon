@@ -1,5 +1,4 @@
-#include "../include/type.h"
-
+#include "../include/irq.h"
 
 volatile uint64_t jiffies = 0;
 

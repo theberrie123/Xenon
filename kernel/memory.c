@@ -1,59 +1,81 @@
 #include "../include/memory.h"
-#include "../include/type.h"
+#include <xenon/type.h>
+#include "../include/string.h"
+
+
+static mem_block_t *free_list = NULL;
+static uint8_t *heap_begin = NULL;
+static uint8_t *heap_end = NULL;
 
 
 
-mem_block_t *free_list = NULL;
-void *heap_start = NULL;
-size_t heap_size = 0;
-
-void kheap_init()
+static inline int blocks_are_adjacent(mem_block_t *a,
+                                      mem_block_t *b)
 {
-        heap_start = (void *)&__heap_start;
-        heap_size = (size_t)(&__heap_end - &__heap_start);
-
-        free_list = (mem_block_t *)heap_start;
-        free_list->size = heap_size - BLOCK_SIZE;
-        free_list->next = NULL;
-        free_list->free = 1;
+        uint8_t *a_end = (uint8_t*)a + BLOCK_SIZE + a->size;
+        return a_end == (uint8_t*)b;
 }
 
-void split_block(mem_block_t *block, size_t size)
+static void coalesce_list()
 {
-        mem_block_t *new_block = (mem_block_t *)((char *)block + BLOCK_SIZE + size);
+        mem_block_t* cur = free_list;
+        while (cur && cur->next) {
+                if (cur->free && cur->next->free && blocks_are_adjacent(cur, cur->next)) {
+                        cur->size += BLOCK_SIZE + cur->next->size;
+                        cur->next = cur->next->next;
+                } else {
+                        cur = cur->next;
+                }
+        }
+}
+
+static mem_block_t *find_suitable(size_t size)
+{
+        mem_block_t *cur = free_list;
+        while (cur) {
+                if (cur->free && cur->size >= size) {
+                        return cur;
+                }
+                cur = cur->next;
+        }
+        return NULL;
+}
+
+static void split_block(mem_block_t *block, size_t size)
+{
+        if (block->size < size + BLOCK_SIZE + ALIGNMENT) {
+                return;
+        }
+
+        uint8_t *new_addr = (uint8_t*)block + BLOCK_SIZE + size;
+        mem_block_t *new_block = (mem_block_t*)new_addr;
+
         new_block->size = block->size - size - BLOCK_SIZE;
-        new_block->next = block->next;
+        new_block->magic = MAGIC;
         new_block->free = 1;
+        new_block->next = block->next;
 
         block->size = size;
         block->next = new_block;
 }
 
-mem_block_t *find_free_block(size_t size)
+void kheap_init()
 {
-        mem_block_t *curr = free_list;
+        heap_begin = &__heap_start;
+        heap_end = &__heap_end;
 
-        while (curr) {
-                if (curr->free && curr->size >= size) {
-                        return curr;
-                }
-                curr = curr->next;
+        uintptr_t aligned_start = ALIGN_UP((uintptr_t)heap_begin, ALIGNMENT);
+        size_t total = (size_t)((uintptr_t)heap_end - aligned_start);
+        if (total < BLOCK_SIZE + ALIGNMENT) {
+                free_list = NULL; /* too small; prevents allocation */
+                return;
         }
-        return NULL;
-}
 
-void coalesce()
-{
-        mem_block_t *curr = free_list;
-
-        while (curr && curr->next) {
-                if (curr->free && curr->next->free) {
-                        curr->size += BLOCK_SIZE + curr->next->size;
-                        curr->next = curr->next->next;
-                } else {
-                        curr = curr->next;
-                }
-        }
+        free_list = (mem_block_t*)aligned_start;
+        free_list->size = total - BLOCK_SIZE;
+        free_list->magic = MAGIC;
+        free_list->free = 1;
+        free_list->next = NULL;
 }
 
 void *kmalloc(size_t size)
@@ -62,17 +84,27 @@ void *kmalloc(size_t size)
                 return NULL;
         }
 
-        mem_block_t *block = find_free_block(size);
-        if (!block) {
-                return NULL;
+        kheap_lock();
+
+        size = ALIGN_UP(size, ALIGNMENT);
+
+        mem_block_t *blk = find_suitable(size);
+        if (!blk) {
+                kheap_unlock();
+                return NULL; /* out of memory (no grow yet) */
         }
 
-        if (block->size > size + BLOCK_SIZE) {
-                split_block(block, size);
+        if (blk->magic != MAGIC) {
+                kheap_unlock();
+                return NULL; /* corruption detected */
         }
-        block->free = 0;
 
-        return (void*)(block + 1);
+        split_block(blk, size);
+        blk->free = 0;
+
+        void *payload = (void*)((uint8_t*)blk + BLOCK_SIZE);
+        kheap_unlock();
+        return payload;
 }
 
 void kfree(void *ptr)
@@ -81,10 +113,23 @@ void kfree(void *ptr)
                 return;
         }
 
-        mem_block_t *block = (mem_block_t *)ptr - 1;
-        block->free = 1;
+        kheap_lock();
 
-        coalesce();
+        mem_block_t *blk = (mem_block_t*)((uint8_t*)ptr - BLOCK_SIZE);
+
+        if (blk->magic != MAGIC) {
+                kheap_unlock();
+                return;
+        }
+        if ((uint8_t*)blk < heap_begin || (uint8_t*)blk >= heap_end) {
+                kheap_unlock();
+                return;
+        }
+
+        blk->free = 1;
+        coalesce_list();
+
+        kheap_unlock();
 }
 
 void *krealloc(void *ptr, size_t new_size)
@@ -92,29 +137,62 @@ void *krealloc(void *ptr, size_t new_size)
         if (!ptr) {
                 return kmalloc(new_size);
         }
-        
         if (new_size == 0) {
                 kfree(ptr);
                 return NULL;
         }
 
-        mem_block_t *block = (mem_block_t *)ptr - 1;
+        new_size = ALIGN_UP(new_size, ALIGNMENT);
 
-        if (block->size >= new_size) {
+        kheap_unlock();
+
+        mem_block_t *blk = (mem_block_t*)((uint8_t*)ptr - BLOCK_SIZE);
+        if (blk->magic != MAGIC) {
+                kheap_unlock();
+                return NULL;
+        }
+
+        if (blk->size >= new_size) {
+                split_block(blk, new_size);
+                kheap_unlock();
                 return ptr;
         }
+
+        if (blk->next && blk->next->free && blocks_are_adjacent(blk, blk->next)) {
+                blk->size += BLOCK_SIZE + blk->next->size;
+                blk->next = blk->next->next;
+
+                if (blk->size >= new_size) {
+                        split_block(blk, new_size);
+                        kheap_unlock();
+                        return ptr;
+                }
+        }
+
+        size_t old_size = blk->size;
+        kheap_unlock();
 
         void *new_ptr = kmalloc(new_size);
         if (!new_ptr) {
                 return NULL;
         }
 
-        size_t copy_size = block->size < new_size ? block->size : new_size;
-        for (size_t i = 0; i < copy_size; i++) {
-                ((char *)new_ptr)[i] = ((char *)ptr)[i];
+        memcpy(new_ptr, ptr, old_size);
+        kfree(ptr);
+        return new_ptr;
+}
+
+void *kcalloc(size_t n, size_t size)
+{
+        if (n && size > (SIZE_MAX / n)) {
+                return NULL;
         }
 
-        kfree(ptr);
-
-        return new_ptr;
+        size_t total = n * size;
+        void *p = kmalloc(total);
+        if (!p) {
+                return NULL;
+        }
+        memset(p, 0, total);
+        return p;
 }

@@ -1,5 +1,4 @@
 #include "../include/idt.h"
-#include "../include/type.h"
 #include "../include/irq.h"
 #include "../include/tty.h"
 

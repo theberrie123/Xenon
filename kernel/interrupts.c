@@ -11,6 +11,17 @@ static volatile uint32_t buffer_head = 0;
 static volatile uint32_t buffer_tail = 0;
 
 
+void enable_interrupts()
+{
+        __asm__ __volatile__ ("sti");
+}
+
+void disable_interrupts()
+{
+        __asm__ __volatile__ ("cli");
+}
+
+
 
 void keyboard_buffer_put(uint8_t scancode)
 {

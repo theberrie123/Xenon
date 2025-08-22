@@ -1,7 +1,8 @@
 #ifndef IDT_H
 #define IDT_H
 
-#include "type.h"
+
+#include <xenon/type.h>
 
 
 struct idt_entry {
@@ -23,4 +24,4 @@ void idt_set_descriptor(uint8_t vector, void *isr, uint8_t flags);
 void idt_set_entry(uint8_t vector, void *isr, uint8_t flags);
 
 
-#endif
+#endif /* IDT_H */

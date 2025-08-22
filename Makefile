@@ -29,7 +29,7 @@ DIRS = $(BUILDDIR_OBJ) $(BUILDDIR_BIN) $(BUILDDIR_BOOT) $(GRUBDIR)
 all: $(ISO)
 
 $(DIRS):
-	@mkdir -p $@
+	mkdir -p $@
 
 $(BOOTOBJ): $(ARCHDIR)/x86/boot/boot.s | $(BUILDDIR_OBJ)
 	$(AS) $(ASFLAGS) $< -o $@
@@ -41,7 +41,7 @@ $(KERNEL): $(BOOTOBJ) $(COBJS) | $(BUILDDIR_BIN)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 $(GRUBDIR)/grub.cfg: | $(GRUBDIR)
-	@test -f $@ || { \
+	test -f $@ || { \
 	 echo 'set timeout=0' > $@; \
 	 echo 'set default=0' >> $@; \
 	 echo 'menuentry "Xenon" {' >> $@; \

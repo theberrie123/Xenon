@@ -2,7 +2,7 @@
 #define PAGING_H
 
 
-#include "type.h"
+#include <xenon/type.h>
 
 
 #define PAGE_SIZE               4096
@@ -39,4 +39,4 @@ int map_page(page_directory_t *pd, uintptr_t vaddr, uintptr_t paddr, uint32_t fl
 int unmap_page(page_directory_t *pd, uintptr_t vaddr);
 
 
-#endif
+#endif /* PAGING_H */
