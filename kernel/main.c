@@ -1,11 +1,12 @@
-#include <tty.h>
-#include <gdt.h>
-#include <idt.h>
-#include <isr.h>
-#include <pic.h>
-#include <pit.h>
-#include <interrupts.h>
-#include <paging.h>
+#include "tty.h"
+#include "gdt.h"
+#include "idt.h"
+#include "isr.h"
+#include "pic.h"
+#include "pit.h"
+#include "interrupts.h"
+#include "paging.h"
+#include "kernel.h"
 
 
 
@@ -27,6 +28,8 @@ void kmain()
 {
         init();
 
+
+        kprintf("Kernel booted...\n");
 
         while (1) { }
 }

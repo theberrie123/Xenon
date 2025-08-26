@@ -1,0 +1,8 @@
+bin/            essential binaries
+sbin/           system binaries
+etc/            configuration files
+proc/           mount point for /proc
+sys/            mount point for /sys
+dev/            device nodes
+tmp/            temporary files
+init            init program
