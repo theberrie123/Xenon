@@ -1,3 +1,4 @@
+// kmain.c
 #include "tty.h"
 #include "gdt.h"
 #include "idt.h"
@@ -7,8 +8,7 @@
 #include "interrupts.h"
 #include "paging.h"
 #include "kernel.h"
-
-
+#include "xenon/memory.h"
 
 void init()
 {
@@ -19,17 +19,17 @@ void init()
         pic_init();
         pit_init(100);
         enable_interrupts();
+        kheap_init();
         paging_init_identity_4mb();
 }
-
 
 
 void kmain()
 {
         init();
 
+        kprintf("Kernel initialized...\n");
 
-        kprintf("Kernel booted...\n");
 
-        while (1) { }
+        while (1) __asm__ __volatile__ ("hlt");
 }

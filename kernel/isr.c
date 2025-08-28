@@ -62,5 +62,5 @@ void isr_init()
         for (uint8_t i = 0; i < ISR_COUNT; i++) {
                 idt_set_entry(i, isr_stubs[i], 0x8E);
         }
-        kprintf("[  %%gOK%%w  ] Initialized ISR...\n");
+        kprintf("[  %%gOK%%w  ]  Initialized ISR\n");
 }

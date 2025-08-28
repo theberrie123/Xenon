@@ -1,11 +1,8 @@
 #include "../include/tty.h"
 #include "../include/string.h"
 #include "../include/io.h"
+#include "xenon/arg.h"
 
-typedef __builtin_va_list va_list;
-#define va_start(ap, last) __builtin_va_start(ap, last)
-#define va_arg(ap, type) __builtin_va_arg(ap, type)
-#define va_end(ap) __builtin_va_end(ap)
 
 unsigned int *framebuffer = (unsigned int *)0xB8000;
 
@@ -56,7 +53,6 @@ void kinit()
         cursor_row = 0;
         cursor_col = 0;
         KCOLOR = 0x0F;
-        kclear();
 }
 
 void kclear()

@@ -1,6 +1,6 @@
-#include "../include/memory.h"
-#include <xenon/type.h>
-#include "../include/string.h"
+#include "xenon/memory.h"
+#include "xenon/type.h"
+#include "xenon/string.h"
 
 
 static mem_block_t *free_list = NULL;

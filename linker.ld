@@ -2,12 +2,13 @@ ENTRY(_start)
 
 MEMORY
 {
-    RAM (rwx) : ORIGIN = 0x00100000, LENGTH = 16M
+    RAM (rwx) : ORIGIN = 0x00200000, LENGTH = 17M
 }
 
 SECTIONS
 {
-    . = 0x00100000;
+    /* start at RAM origin (use ORIGIN(RAM) so it matches MEMORY) */
+    . = ORIGIN(RAM);
 
     .text :
     {
@@ -30,11 +31,13 @@ SECTIONS
         *(.bss)
         *(COMMON)
     } > RAM
-
+    
     .heap (NOLOAD) :
     {
+        . = ALIGN(8);
         __heap_start = .;
-        . += 0x10000; /* 64 KB heap */
+        . += 0x80000; /* 512 KiB heap for testing */
         __heap_end = .;
+        . = ALIGN(8);
     } > RAM
 }

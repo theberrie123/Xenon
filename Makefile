@@ -1,5 +1,3 @@
-# Makefile for Xenon kernel (no GRUB, no automatic QEMU)
-
 AS = as
 ASFLAGS = -32
 
@@ -12,39 +10,35 @@ LDFLAGS = -m elf_i386 -T linker.ld
 
 SRCDIR = kernel
 ARCHDIR = arch
-BUILDDIR_OBJ = build/obj
-BUILDDIR_BIN = build/bin
+BUILDDIR = build
 
-KERNEL = $(BUILDDIR_BIN)/vmxez
+KERNEL = vmxez
 
 CFILES := $(wildcard $(SRCDIR)/*.c)
-COBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR_OBJ)/%.o,$(CFILES))
-BOOTOBJ = $(BUILDDIR_OBJ)/boot.o
+COBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES))
+BOOTOBJ = $(BUILDDIR)/boot.o
 
-DIRS = $(BUILDDIR_OBJ) $(BUILDDIR_BIN)
+all: $(BUILDDIR) $(KERNEL)
+	@rm -rf $(BUILDDIR)
 
-all: $(KERNEL)
-
-$(DIRS):
+# Ensure build directory exists
+$(BUILDDIR):
 	mkdir -p $@
 
 # Assemble boot sector
-$(BOOTOBJ): $(ARCHDIR)/x86/boot/boot.s | $(BUILDDIR_OBJ)
+$(BOOTOBJ): $(ARCHDIR)/x86/boot/boot.s
 	$(AS) $(ASFLAGS) $< -o $@
 
 # Compile C files
-$(BUILDDIR_OBJ)/%.o: $(SRCDIR)/%.c | $(BUILDDIR_OBJ)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
-# Link kernel
-$(KERNEL): $(BOOTOBJ) $(COBJS) | $(BUILDDIR_BIN)
-	$(LD) $(LDFLAGS) -o $@ $^
+# Link kernel inside build/
+$(KERNEL): $(BOOTOBJ) $(COBJS)
+	$(LD) $(LDFLAGS) -o $(BUILDDIR)/$@ $(BOOTOBJ) $(COBJS)
+	mv $(BUILDDIR)/$@ ./   # move final binary to main folder
 
-# Clean build artifacts
-clean:
-	rm -rf build
 
 -include $(COBJS:.o=.d)
 
-.PHONY: all clean
-
+.PHONY: all

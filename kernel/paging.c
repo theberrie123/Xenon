@@ -93,7 +93,7 @@ void paging_init_identity_4mb(void) {
     // Enable paging
     paging_enable((page_directory_t*)virt_to_phys(&kernel_pd));
 
-    kprintf("[paging] Enabled with identity map 0..4MiB\n");
+    kprintf("[  %%gOK%%w  ]  Initialized with identity map 0..4MiB\n");
 }
 
 void page_fault_isr(uint32_t err_code) {

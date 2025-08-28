@@ -24,8 +24,11 @@ _start:
         mov $stack_top, %esp
 
         push %ebx
+        push %eax
+
         call kmain
         add $4, %esp
+
         cli
 halt_loop:
         hlt
