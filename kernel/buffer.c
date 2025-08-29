@@ -1,6 +1,8 @@
 #include "../include/buffer.h"
 #include "../include/tty.h"
-#include "../include/memory.h"
+
+#include "xenon/memory.h"
+
 
 int resize_buffer(struct Buffer *buffer, size_t new_size)
 {

@@ -1,44 +1,59 @@
-AS = as
+# -----------------------------
+# Toolchain
+# -----------------------------
+AS      = as
 ASFLAGS = -32
 
-CC = gcc
-CFLAGS = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
-         -Wall -Wextra -Iinclude -Iarch/x86/include -c -MMD -MP
+CC      = gcc
+CFLAGS  = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+          -Wall -Wextra -Iinclude -Iarch/x86/include -c -MMD -MP
 
-LD = ld
+LD      = ld
 LDFLAGS = -m elf_i386 -T linker.ld
 
-SRCDIR = kernel
-ARCHDIR = arch
-BUILDDIR = build
+# -----------------------------
+# Directories
+# -----------------------------
+SRCDIR    = kernel
+ARCHDIR   = arch
+BUILDDIR  = build
 
-KERNEL = vmxez
+KERNEL    = vmxez
 
-CFILES := $(wildcard $(SRCDIR)/*.c)
-COBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES))
+# -----------------------------
+# Source files
+# -----------------------------
+CFILES := $(shell find $(SRCDIR) -name '*.c')
+COBJS  := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES))
+
 BOOTOBJ = $(BUILDDIR)/boot.o
 
-all: $(BUILDDIR) $(KERNEL)
-	@rm -rf $(BUILDDIR)
-
-# Ensure build directory exists
-$(BUILDDIR):
-	mkdir -p $@
+# -----------------------------
+# Targets
+# -----------------------------
+all: $(KERNEL)
 
 # Assemble boot sector
 $(BOOTOBJ): $(ARCHDIR)/x86/boot/boot.s
+	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) $< -o $@
 
-# Compile C files
+# Compile C files (handle subdirectories automatically)
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(dir $@)   # ensure directory exists for both .o and .d
 	$(CC) $(CFLAGS) $< -o $@
 
-# Link kernel inside build/
+# Link kernel
 $(KERNEL): $(BOOTOBJ) $(COBJS)
 	$(LD) $(LDFLAGS) -o $(BUILDDIR)/$@ $(BOOTOBJ) $(COBJS)
 	mv $(BUILDDIR)/$@ ./   # move final binary to main folder
 
+# Clean build artifacts
+clean:
+	rm -rf $(BUILDDIR) $(KERNEL)
 
+# Include dependency files
 -include $(COBJS:.o=.d)
 
-.PHONY: all
+.PHONY: all clean
+

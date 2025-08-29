@@ -22,6 +22,8 @@ void isr_handler_c(registers_t *regs)
 }
 
 
+
+
 void isr_register_handler(uint8_t n, isr_handler_t handler)
 {
     if (n < ISR_COUNT)

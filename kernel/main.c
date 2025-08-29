@@ -19,17 +19,26 @@ void init()
         pic_init();
         pit_init(100);
         enable_interrupts();
-        kheap_init();
         paging_init_identity_4mb();
 }
 
+void test_heap()
+{
+        int size1 = 32;
+        int size2 = 64;
+        void *a = kmalloc(size1);
+        kprintf("Allocated '%d' for '%c'", size1, 'a');
+        kprintf("%d", sizeof(a));
+}
 
 void kmain()
 {
         init();
 
         kprintf("Kernel initialized...\n");
-
+        
+        test_heap();
+        
 
         while (1) __asm__ __volatile__ ("hlt");
 }
