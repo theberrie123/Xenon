@@ -28,5 +28,7 @@ unsigned long strtol(const char *s, char **endptr, int base);
 int snprintf(char *buf, size_t size,
              const char *fmt, ...);
 
+char *strtok(char *str, const char *delim);
+char *strchr(const char *s, char c);
 
 #endif /* STRING_H */

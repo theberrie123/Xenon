@@ -269,3 +269,61 @@ int snprintf(char *buf, size_t size,
     va_end(args);
     return pos;
 }
+
+char *strtok(char *str, const char *delim)
+{
+    static char *next; // keeps track of the next token start
+    if (str) next = str; // first call
+
+    if (!next) return NULL; // no more tokens
+
+    // Skip leading delimiters
+    while (*next) {
+        int is_delim = 0;
+        for (const char *d = delim; *d; d++) {
+            if (*next == *d) {
+                is_delim = 1;
+                break;
+            }
+        }
+        if (!is_delim) break;
+        next++;
+    }
+
+    if (*next == '\0') return NULL; // reached end
+
+    // Start of token
+    char *start = next;
+
+    // Find the end of the token
+    while (*next) {
+        int is_delim = 0;
+        for (const char *d = delim; *d; d++) {
+            if (*next == *d) {
+                is_delim = 1;
+                break;
+            }
+        }
+        if (is_delim) {
+            *next = '\0'; // terminate token
+            next++;       // move past the delimiter
+            return start;
+        }
+        next++;
+    }
+
+    // Last token
+    next = NULL;
+    return start;
+}
+
+char *strchr(const char *s, char c)
+{
+        while (*s) {
+                if (*s == c) {
+                        return (char *)s;
+                }
+                s++;
+        }
+        return 0;
+}

@@ -23,11 +23,10 @@ stack_top:
 _start:
         mov $stack_top, %esp
 
-        push %ebx
-        push %eax
-
+        push %ebx /* push mbi */
+        push %eax /* push magic */
         call kmain
-        add $4, %esp
+        add $8, %esp /* clean up stack (2 args)
 
         cli
 halt_loop:

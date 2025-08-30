@@ -154,62 +154,76 @@ void int_to_str(int num, char *str)
 
 void kprintf(const char *format, ...)
 {
-        va_list args;
-        va_start(args, format);
+    va_list args;
+    va_start(args, format);
 
-        for (const char *p = format; *p != '\0'; p++) {
-                if (*p == '%' && *(p+1) == '%') {
-                        p += 2;
-                        switch (*p) {
-                                case 'g': tty_set_color(GREEN_ON_BLACK); break;
-                                case 'w': tty_set_color(WHITE_ON_BLACK); break;
-                                case 'y': tty_set_color(YELLOW_ON_BLACK); break;
-                                case 'r': tty_set_color(RED_ON_BLACK); break;
-                                default: break;
-                        }
-                        continue;
-                }
-
-                if (*p == '%') {
-                        p++;
-                        switch (*p) {
-                                case 'c':
-                                        char c = (char)va_arg(args, int);
-                                        kputchar(c);
-                                        break;
-                                case 's':
-                                        const char *s = va_arg(args, const char *);
-                                        for (int i = 0; s[i] != '\0'; i++) {
-                                                kputchar(s[i]);
-                                        }
-                                        break;
-                                case 'd':
-                                        char buffer[12];
-                                        int d = va_arg(args, int);
-                                        int_to_str(d, buffer);
-                                        for (int i = 0; buffer[i] != '\0'; i++) {
-                                                kputchar(buffer[i]);
-                                        }
-                                        break;
-                                case 'x':
-                                        unsigned int x = va_arg(args, unsigned int);
-                                        const char *hex = "0123456789ABCDEF";
-                                        for (int i = 28; i >= 0; i -= 4) {
-                                                char ch = hex[(x >> i) & 0xF];
-                                                kputchar(ch);
-                                        }
-                                        break;
-                                case '%':
-                                        kputchar('%');
-                                        break;
-                                default:
-                                        kputchar(*p);
-                                        break;
-                        }
-                } else {
-                        kputchar(*p);
-                }
+    for (const char *p = format; *p != '\0'; p++) {
+        if (*p == '%' && *(p+1) == '%') {
+            p += 2;
+            switch (*p) {
+                case 'g': tty_set_color(GREEN_ON_BLACK); break;
+                case 'w': tty_set_color(WHITE_ON_BLACK); break;
+                case 'y': tty_set_color(YELLOW_ON_BLACK); break;
+                case 'r': tty_set_color(RED_ON_BLACK); break;
+                default: break;
+            }
+            continue;
         }
 
-        va_end(args);
+        if (*p == '%') {
+            p++;
+            switch (*p) {
+                case 'c': {
+                    char c = (char)va_arg(args, int);
+                    kputchar(c);
+                    break;
+                }
+                case 's': {
+                    const char *s = va_arg(args, const char *);
+                    for (int i = 0; s[i] != '\0'; i++) {
+                        kputchar(s[i]);
+                    }
+                    break;
+                }
+                case 'd': {
+                    char buffer[12];
+                    int d = va_arg(args, int);
+                    int_to_str(d, buffer);
+                    for (int i = 0; buffer[i] != '\0'; i++) {
+                        kputchar(buffer[i]);
+                    }
+                    break;
+                }
+                case 'u': {  // NEW: unsigned decimal
+                    char buffer[12];
+                    unsigned int u = va_arg(args, unsigned int);
+                    int_to_str(u, buffer);  // you need to implement this
+                    for (int i = 0; buffer[i] != '\0'; i++) {
+                        kputchar(buffer[i]);
+                    }
+                    break;
+                }
+                case 'x': {
+                    unsigned int x = va_arg(args, unsigned int);
+                    const char *hex = "0123456789ABCDEF";
+                    for (int i = 28; i >= 0; i -= 4) {
+                        char ch = hex[(x >> i) & 0xF];
+                        kputchar(ch);
+                    }
+                    break;
+                }
+                case '%':
+                    kputchar('%');
+                    break;
+                default:
+                    kputchar(*p);
+                    break;
+            }
+        } else {
+            kputchar(*p);
+        }
+    }
+
+    va_end(args);
 }
+
