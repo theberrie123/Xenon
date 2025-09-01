@@ -5,7 +5,7 @@
 
 
 
-# Makefile
+## Makefile
 To compile and make the image:
     ```
     make
@@ -15,7 +15,7 @@ To load it in Lithium (node)
     mv vmxez ../Lithium && cd ../Lithium && make clean && make run
     ```
 
-# Git
+## Git
 
 To fetch the repo and replace everything:
     ```
