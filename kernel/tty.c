@@ -1,12 +1,12 @@
-#include "../include/tty.h"
-#include "../include/string.h"
-#include "../include/io.h"
+#include "tty.h"
+#include "string.h"
+#include "io.h"
 #include "xenon/arg.h"
 
 
 unsigned int *framebuffer = (unsigned int *)0xB8000;
 
-static __volatile__ uint16_t* VGA_MEMORY = (__volatile__ uint16_t*)0xB8000;
+static __volatile__ uint16_t *VGA_MEMORY = (__volatile__ uint16_t*)0xB8000;
 
 static int cursor_row;
 static int cursor_col;

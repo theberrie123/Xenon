@@ -1,6 +1,6 @@
-#include "../include/paging.h"
-#include "../include/tty.h"
-#include "../include/isr.h"
+#include "paging.h"
+#include "tty.h"
+#include "isr.h"
 
 
 static void page_fault_isr_wrapper(registers_t *regs)

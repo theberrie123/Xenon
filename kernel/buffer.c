@@ -1,10 +1,10 @@
-#include "../include/buffer.h"
-#include "../include/tty.h"
+#include "buffer.h"
+#include "tty.h"
 
 #include "xenon/memory.h"
 
 
-int resize_buffer(struct Buffer *buffer, size_t new_size)
+int resize_buffer(struct buffer *buffer, size_t new_size)
 {
         size_t new_allocated = (size_t)(new_size * 1.125) + 6;
         if (new_allocated < new_size + 1) {
@@ -20,7 +20,7 @@ int resize_buffer(struct Buffer *buffer, size_t new_size)
         return 0;
 }
 
-void init_buffer(struct Buffer *buffer)
+void init_buffer(struct buffer *buffer)
 {
         buffer->data = kmalloc(32);
         if (!buffer->data) {
@@ -33,7 +33,7 @@ void init_buffer(struct Buffer *buffer)
         buffer->data[0] = '\0';
 }
 
-void add_char_buffer(struct Buffer *buffer, char c)
+void add_char_buffer(struct buffer *buffer, char c)
 {
         if (buffer->length + 1 >= buffer->allocated) {
                 if (resize_buffer(buffer, buffer->length + 1) != 0) {
@@ -44,7 +44,7 @@ void add_char_buffer(struct Buffer *buffer, char c)
         buffer->data[buffer->length] = '\0';
 }
 
-void clear_buffer(struct Buffer *buffer)
+void clear_buffer(struct buffer *buffer)
 {
         buffer->length = 0;
         if (buffer->data) {
@@ -52,7 +52,7 @@ void clear_buffer(struct Buffer *buffer)
         }
 }
 
-void free_buffer(struct Buffer *buffer)
+void free_buffer(struct buffer *buffer)
 {
         kfree(buffer->data);
         buffer->data = NULL;

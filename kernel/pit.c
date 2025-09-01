@@ -1,12 +1,19 @@
-#include "../include/io.h"
-#include "../include/pit.h"
-#include "../include/tty.h"
+#include "io.h"
+#include "pit.h"
+#include "tty.h"
+#include "sched/task.h"
 
 
 /* number of PIT ticks since boot */
 static __volatile__ uint64_t jiffies = 0;
 
 static uint32_t pit_hz = 100; /* default */
+
+void pit_tick()
+{
+        jiffies++;
+        schedule();
+}
 
 void pit_set_frequency(uint32_t frequency_hz)
 {
@@ -31,7 +38,7 @@ void pit_set_frequency(uint32_t frequency_hz)
         *       bit 0: BCD (0 = 16-bit binary)
         */
         outb(PIT_COMMAND_PORT, 0x36); /* 0x36 = 00 11 011 0 */
-        uint8_t lo = divisor & 0xFE;
+        uint8_t lo = divisor & 0xFF;
         uint8_t hi = (divisor >> 8) & 0xFF;
         outb(PIT_CHANNEL0_PORT, lo);
         outb(PIT_CHANNEL0_PORT, hi);

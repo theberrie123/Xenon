@@ -11,19 +11,23 @@
 #include "init/initramfs.h"
 #include "isr.h"
 #include "paging.h"
+#include "sched/task.h"
 
 
 void init()
 {
-    kinit();
-    gdt_init();
-    idt_init();
-    isr_init();
-    pic_init();
-    pit_init(100);
-    enable_interrupts();
-    paging_init_identity_4mb();
+        kinit();
+        gdt_init();
+        idt_init();
+        isr_init();
+        pic_init();
+        pit_init(100);
+        enable_interrupts();
+        paging_init_identity_4mb();
+        scheduler_init();    
 }
+
+
 
 void kmain(unsigned long magic, struct multiboot_info *mbi)
 {
@@ -68,6 +72,8 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
         } else {
                 kprintf(" /init found, size=%u", init_file.size);
         }
+
+
 
     for (;;) __asm__ __volatile__ ("hlt");
 }

@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-/* Standard fixed-width integer types */
+
 typedef unsigned char       uint8_t;
 typedef unsigned short      uint16_t;
 typedef unsigned int        uint32_t;
@@ -12,29 +12,24 @@ typedef signed short        int16_t;
 typedef signed int          int32_t;
 typedef signed long long    int64_t;
 
-/* Pointer-sized integers */
 typedef unsigned int        uintptr_t;
 typedef signed int          intptr_t;
 
 typedef int int_fast16_t;
 
 
-/* Boolean type */
 typedef enum {
     BOOL_FALSE = 0,
     BOOL_TRUE  = 1
 } bool_t;
 
-/* NULL pointer */
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
 
-/* Size types */
 typedef unsigned long size_t;
 typedef long          ssize_t;
 
-/* Define SIZE_MAX depending on architecture */
 #if defined(__SIZE_MAX__)
     #define SIZE_MAX __SIZE_MAX__
 #elif defined(__x86_64__) || defined(_M_X64)

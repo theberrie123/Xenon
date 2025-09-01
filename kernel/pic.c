@@ -1,6 +1,6 @@
-#include "../include/pic.h"
-#include "../include/io.h"
-#include "../include/tty.h"
+#include "pic.h"
+#include "io.h"
+#include "tty.h"
 
 
 void pic_remap(int offset1, int offset2)
@@ -37,5 +37,5 @@ void pic_init()
         pic_remap(0x20, 0x28);
         pic_set_mask(0xFC, 0xFF);
 
-        kprintf("[  %%gOK%%w  ]  Initialized PIC\n");
+        kprintf("[  %%gOK%%w  ]  initialized PIC\n");
 }

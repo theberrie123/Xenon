@@ -1,6 +1,6 @@
-#include "../include/idt.h"
-#include "../include/irq.h"
-#include "../include/tty.h"
+#include "idt.h"
+#include "irq.h"
+#include "tty.h"
 
 
 #define IDT_SIZE 256
@@ -134,9 +134,7 @@ void idt_init()
         idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
 
         extern void irq0_handler();
-        extern void irq1_handler();
         idt_set_entry(32, irq0_handler, 0x8E);
-        idt_set_entry(33, irq1_handler, 0x8E);
 
         __asm__ __volatile__ ("lidt %0" :: "m"(idtr));
 

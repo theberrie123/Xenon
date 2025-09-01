@@ -1,5 +1,5 @@
-#include "../include/gdt.h"
-#include "../include/tty.h"
+#include "gdt.h"
+#include "tty.h"
 
 static struct gdt_entry gdt[3];
 static struct gdt_ptr gdtr;
