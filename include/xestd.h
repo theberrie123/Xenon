@@ -1,36 +1,18 @@
-#ifndef _XESTD_H
-#define _XESTD_H
+#ifndef XESTD_H
+#define XESTD_H
 
 
-#include "xenon/type.h"
 
-
-#define SYS_EXIT 0
-#define SYS_WRITE 1
-
-
-extern unsigned int syscall_handler(unsigned int num, unsigned int arg1, unsigned int arg2, unsigned int arg3);
-
-
-ssize_t write(int fd, const void *buf, size_t count)
-{
-        int ret;
-        __asm__ __volatile__ (
-                "int $0x80"
-                : "=a"(ret)
-                : "a"(SYS_WRITE), "b"(fd), "c"(buf), "d"(count)
-        );
-        return ret;
-}
-
-void exit(int code)
-{
-        __asm__ __volatile__ (
-                "int $0x80"
-                :
-                : "a"(SYS_EXIT), "b"(code)
-        );
+static inline void sys_write(const char *buf, unsigned int count) {
+    __asm__ __volatile__ (
+        "int $0x90"
+        :
+        : "a"(1),      // syscall number = SYS_WRITE
+          "b"(1),      // fd = stdout
+          "c"(buf),    // buffer
+          "d"(count)   // length
+    );
 }
 
 
-#endif /* _XESTD_H */
+#endif /* XESTD_H */

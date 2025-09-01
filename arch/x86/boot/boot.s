@@ -26,7 +26,7 @@ _start:
         push %ebx /* push mbi */
         push %eax /* push magic */
         call kmain
-        add $8, %esp /* clean up stack (2 args)
+        add $8, %esp /* clean up stack (2 args) */
 
         cli
 halt_loop:

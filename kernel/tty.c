@@ -194,10 +194,10 @@ void kprintf(const char *format, ...)
                     }
                     break;
                 }
-                case 'u': {  // NEW: unsigned decimal
+                case 'u': {  // unsigned decimal
                     char buffer[12];
                     unsigned int u = va_arg(args, unsigned int);
-                    int_to_str(u, buffer);  // you need to implement this
+                    int_to_str(u, buffer);
                     for (int i = 0; buffer[i] != '\0'; i++) {
                         kputchar(buffer[i]);
                     }
@@ -208,6 +208,19 @@ void kprintf(const char *format, ...)
                     const char *hex = "0123456789ABCDEF";
                     for (int i = 28; i >= 0; i -= 4) {
                         char ch = hex[(x >> i) & 0xF];
+                        kputchar(ch);
+                    }
+                    break;
+                }
+                case 'p': {  // Print pointer (memory address)
+                    void *ptr = va_arg(args, void *);
+                    unsigned long addr = (unsigned long)ptr;  // Cast pointer to unsigned long
+                    kputchar('0');  // For "0x" prefix
+                    kputchar('x');
+                    
+                    const char *hex = "0123456789ABCDEF";
+                    for (int i = 60; i >= 0; i -= 4) {
+                        char ch = hex[(addr >> i) & 0xF];
                         kputchar(ch);
                     }
                     break;
