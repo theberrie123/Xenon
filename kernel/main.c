@@ -31,50 +31,45 @@ void init()
 
 void kmain(unsigned long magic, struct multiboot_info *mbi)
 {
-    init();
+        init();
 
-    if (magic != 0x2BADB002) {
-        kprintf("[  %%rERR%%w ]  not booted with GRUB\n");
-        return;
-    }
-
-    /* Unpack initramfs if present (you already do this earlier in your code).
-       If unpack_to_rootfs has been called above, find_file_in_initramfs can locate files. */
-    if (mbi->flags & MULTIBOOT_INFO_MODS) {
-        /* your existing scanning/unpack code here (unchanged) */
-        struct multiboot_module *mods = (struct multiboot_module *) mbi->mods_addr;
-        for (unsigned int i = 0; i < mbi->mods_count; i++) {
-            struct multiboot_module *mod = &mods[i];
-            if (mod->mod_start && mod->mod_end) {
-                unsigned char *initramfs_start = (unsigned char *) mod->mod_start;
-                unsigned char *initramfs_end = (unsigned char *) mod->mod_end;
-                unsigned long initramfs_size = mod->mod_end - mod->mod_start;
-
-                struct initramfs initramfs = {
-                    .start = initramfs_start,
-                    .end = initramfs_end,
-                    .size = initramfs_size,
-                };
-
-                kprintf("[  %%gOK%%w  ]  initramfs module found\n");
-
-                unpack_to_rootfs(initramfs); /* your function copies and mounts it */
-                break;
-            }
+        if (magic != 0x2BADB002) {
+                kprintf("[  %%rERR%%w ]  not booted with GRUB\n");
+                return;
         }
-    } else {
-        kprintf("[  %%rERR%%w ]  initramfs module not found\n");
-    }
+
+        if (mbi->flags & MULTIBOOT_INFO_MODS) {
+                struct multiboot_module *mods = (struct multiboot_module *) mbi->mods_addr;
+                for (unsigned int i = 0; i < mbi->mods_count; i++) {
+                        struct multiboot_module *mod = &mods[i];
+                        if (mod->mod_start && mod->mod_end) {
+                                unsigned char *initramfs_start = (unsigned char *) mod->mod_start;
+                                unsigned char *initramfs_end = (unsigned char *) mod->mod_end;
+                                unsigned long initramfs_size = mod->mod_end - mod->mod_start;
+
+                                struct initramfs initramfs = {
+                                        .start = initramfs_start,
+                                        .end = initramfs_end,
+                                        .size = initramfs_size,
+                                };
+
+                                kprintf("[  %%gOK%%w  ]  initramfs module found\n");
+
+                                unpack_to_rootfs(initramfs);
+                                break;
+                        }
+                }
+        } else {
+                kprintf("[  %%rERR%%w ]  initramfs module not found\n");
+        }
 
         struct file_in_ram init_file = find_file_in_initramfs("/init");
         if (init_file.data == NULL) {
                 kprintf("[  %%rERR%%w ]  /init not found\n");
         } else {
-                kprintf(" /init found, size=%u", init_file.size);
+                kprintf("/init found, size=%u", init_file.size);
         }
 
 
-
-    for (;;) __asm__ __volatile__ ("hlt");
+        for (;;) __asm__ __volatile__ ("hlt");
 }
-
