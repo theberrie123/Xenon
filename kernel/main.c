@@ -1,17 +1,4 @@
-#include "tty.h"
-#include "gdt.h"
-#include "idt.h"
-#include "pic.h"
-#include "pit.h"
-#include "interrupts.h"
 #include "kernel.h"
-#include "multiboot.h"
-#include "xenon/string.h"
-#include "xenon/memory.h"
-#include "init/initramfs.h"
-#include "isr.h"
-#include "paging.h"
-#include "sched/task.h"
 
 
 void init()

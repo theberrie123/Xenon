@@ -2,9 +2,8 @@
 #define GDT_H
 
 
-#include <xenon/type.h>
+#include "xenon/type.h"
 
-/* GDT entry struct */
 struct gdt_entry {
     uint16_t limit_low;     // lower 16 bits of limit
     uint16_t base_low;      // lower 16 bits of base address
@@ -14,7 +13,6 @@ struct gdt_entry {
     uint8_t  base_high;     // bits 24-31 of base address
 } __attribute__((packed));
 
-/* GDTR register format */
 struct gdt_ptr {
     uint16_t limit;         // size of GDT -1
     uint32_t base;          // address of GDT
@@ -22,4 +20,4 @@ struct gdt_ptr {
 
 void gdt_init();
 
-#endif
+#endif /* GDT_H */

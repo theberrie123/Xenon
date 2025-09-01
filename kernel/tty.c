@@ -239,4 +239,3 @@ void kprintf(const char *format, ...)
 
     va_end(args);
 }
-
