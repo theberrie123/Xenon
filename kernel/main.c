@@ -57,6 +57,5 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                 kprintf("/init found, size=%u", init_file.size);
         }
 
-
         for (;;) __asm__ __volatile__ ("hlt");
 }
