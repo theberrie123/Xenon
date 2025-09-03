@@ -14,6 +14,7 @@
 #include "isr.h"
 #include "paging.h"
 #include "sched/task.h"
+#include "elf.h"
 
 
 #endif /* KERNEL_H */

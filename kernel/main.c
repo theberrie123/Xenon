@@ -1,7 +1,6 @@
 #include "kernel.h"
 
 
-
 void init()
 {
         kinit();
@@ -49,13 +48,6 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                 }
         } else {
                 kprintf("[  %%rERR%%w ]  initramfs module not found\n");
-        }
-
-        struct file_in_ram init_file = find_file_in_initramfs("/init");
-        if (init_file.data == NULL) {
-                kprintf("[  %%rERR%%w ]  /init not found\n");
-        } else {
-                kprintf("/init found, size=%u", init_file.size);
         }
 
         for (;;) __asm__ __volatile__ ("hlt");

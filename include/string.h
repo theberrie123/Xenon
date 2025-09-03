@@ -2,7 +2,7 @@
 #define STRING_H
 
 
-#include <xenon/type.h>
+#include "xenon/type.h"
 
 
 size_t strlen(const char *str);

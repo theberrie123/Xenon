@@ -2,7 +2,8 @@
 #define TTY_H
 
 
-#include <xenon/type.h>
+#include "xenon/type.h"
+
 
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
@@ -33,4 +34,4 @@ void move_cursor(int dx, int dy);
 void draw_cursor(int x, int y);
 
 
-#endif
+#endif /* TTY_H */

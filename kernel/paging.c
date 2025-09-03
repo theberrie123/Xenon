@@ -84,9 +84,6 @@ void paging_init_identity_4mb(void) {
     // Point PD[0] to first_pt (present + rw)
     kernel_pd.entries[0] = (pde_t)(virt_to_phys(&first_pt) | P_RW | P_PRESENT);
 
-    // Optional: also map the kernel higher-half mirror (e.g., 0xC0000000) if you plan to move later
-    // kernel_pd.entries[0x300] = (pde_t)(virt_to_phys(&first_pt) | P_RW | P_PRESENT);
-
     // Register page fault ISR (interrupt 14)
     isr_register_handler(14, page_fault_isr_wrapper);
 
@@ -113,6 +110,5 @@ void page_fault_isr(uint32_t err_code) {
                 reserved ? "reserved" : "ok",
                 instr_fetch ? "ifetch" : "data");
 
-        // For now: halt. Later you can allocate a page on-demand, kill task, etc.
         __asm__ __volatile__ ("cli; hlt");
 }
