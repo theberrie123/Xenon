@@ -11,14 +11,13 @@ static isr_handler_t interrupt_handlers[ISR_COUNT] = {0};
 
 void isr_handler_c(registers_t *regs)
 {
-    if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
-        interrupt_handlers[regs->int_no](regs);
-        return;
-    }
+        if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
+                interrupt_handlers[regs->int_no](regs);
+                return;
+        }
 
-        kprintf("Unhandled interrupt: %d, err: %x\n", regs->int_no, regs->err_code);
-        kprintf("EIP=%x CS=%x EFLAGS=%x\n", regs->eip, regs->cs, regs->eflags);
-        kprintf("EAX=%x EBX=%x ECX=%x EDX=%x\n", regs->eax, regs->ebx, regs->ecx, regs->edx);
+        panic("unhandled interrupt: %d, err: %x", regs->int_no, regs->err_code);
+
 }
 
 
@@ -64,5 +63,5 @@ void isr_init()
         for (uint8_t i = 0; i < ISR_COUNT; i++) {
                 idt_set_entry(i, isr_stubs[i], 0x8E);
         }
-        kprintf("[  %%gOK%%w  ]  Initialized ISR\n");
+        kprintf("%%ginitialized ISR%%w\n");
 }

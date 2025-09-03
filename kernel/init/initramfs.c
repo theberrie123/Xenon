@@ -7,7 +7,6 @@ static struct mount mount_table[MAX_MOUNTS];
 
 #define ALIGN4(x) (((x) + 3) & ~3)
 
-/* Find a file by hierarchical path, e.g., "/etc/bin/init" */
 struct file_in_ram find_file_in_initramfs(const char *path) {
     if (!initramfs_in_ram || !path) {
         struct file_in_ram empty = { NULL, 0 };
@@ -15,7 +14,7 @@ struct file_in_ram find_file_in_initramfs(const char *path) {
     }
 
     const char *search_path = path;
-    if (search_path[0] == '/') search_path++; // skip leading slash
+    if (search_path[0] == '/') search_path++;
 
     unsigned char *ptr = initramfs_in_ram;
 
@@ -30,16 +29,14 @@ struct file_in_ram find_file_in_initramfs(const char *path) {
         char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
         unsigned char *data = (unsigned char *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
 
-        // Skip "." entries and TRAILER!!!
         if ((namesize == 2 && name[0] == '.') ||
             (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
             ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
             continue;
         }
 
-        unsigned long name_len = namesize - 1; // ignore null terminator
+        unsigned long name_len = namesize - 1;
 
-        // Compare full path
         if (strlen(search_path) == name_len &&
             strncmp(name, search_path, name_len) == 0) {
             struct file_in_ram file = { data, filesize };
@@ -54,7 +51,6 @@ struct file_in_ram find_file_in_initramfs(const char *path) {
 }
 
 
-/* Mount helpers */
 int add_mount(const char *mount_point, void *fs_data, int fs_type) {
     for (int i = 0; i < MAX_MOUNTS; i++) {
         if (mount_table[i].mount_point == NULL) {
@@ -68,9 +64,8 @@ int add_mount(const char *mount_point, void *fs_data, int fs_type) {
 }
 
 int mount(const char *mount_point, void *source, int fs_type) {
-    if (!mount_point || !source) {
-        kprintf("[  %%rERR%%w ] Invalid mount point or source\n");
-        return -1;
+        if (!mount_point || !source) {
+                panic("invalid mount point or source\n");
     }
 
     switch (fs_type) {
@@ -82,31 +77,26 @@ int mount(const char *mount_point, void *source, int fs_type) {
             break;
 
         default:
-            kprintf("[  %%rERR%%w ] Unknown file system type: %d\n", fs_type);
-            break;
+                panic("unknown file system type: %d\n", fs_type);
     }
 
     return -1;
 }
 
-/* Initialize initramfs and mount at root */
 void init_mount(struct initramfs initramfs) {
-    if (!initramfs.start || initramfs.size == 0) {
-        kprintf("[  %%rERR%%w ] initramfs is not loaded properly\n");
-        return;
-    }
+        if (!initramfs.start || initramfs.size == 0) {
+                panic("initramfs is not loaded properly. start: %d, size: %d", initramfs.start, initramfs.size);
+        }
 
-    kprintf("[  %%gOK%%w  ]  Initializing initramfs\n");
+        kprintf("[  %%gOK%%w  ]  Initializing initramfs\n");
 
-    // Mount initramfs at root
-    if (mount("/", initramfs.start, FS_TYPE_TMPFS) != 0) {
-        kprintf("[  %%rERR%%w ] Failed to mount initramfs at root\n");
-    } else {
-        kprintf("[  %%gOK%%w  ]  initramfs successfully mounted at root (/)\n");
-    }
+        if (mount("/", initramfs.start, FS_TYPE_TMPFS) != 0) {
+                panic("failed to mount initramfs at root\n");
+        } else {
+                kprintf("[  %%gOK%%w  ]  initramfs successfully mounted at root (/)\n");
+        }
 }
 
-/* Parse and print initramfs root directory */
 void parse_initramfs_root(void) {
     if (!initramfs_in_ram) return;
 
@@ -134,34 +124,29 @@ void parse_initramfs_root(void) {
     }
 }
 
-/* Load initramfs into RAM and mount as root */
 void unpack_to_rootfs(struct initramfs initramfs) {
     if (!initramfs.start || initramfs.size == 0) {
         kprintf("[  %%rERR%%w ] initramfs is not loaded properly\n");
         return;
     }
 
-    // Allocate memory for initramfs in RAM
     initramfs_in_ram = (unsigned char *) kmalloc(initramfs.size);
     if (!initramfs_in_ram) {
         kprintf("[  %%rERR%%w ] Failed to allocate memory for initramfs\n");
         return;
     }
 
-    // Copy initramfs
     for (unsigned long i = 0; i < initramfs.size; i++)
         initramfs_in_ram[i] = initramfs.start[i];
 
     kprintf("[  %%gOK%%w  ]  initramfs loaded into RAM\n");
 
-    // Mount initramfs at root
     if (mount("/", initramfs_in_ram, FS_TYPE_TMPFS) != 0) {
         kprintf("[  %%rERR%%w ] Failed to mount initramfs at root\n");
         return;
     }
     kprintf("[  %%gOK%%w  ]  initramfs mounted at root (/)\n");
 
-    // Validate root directory contents
     kprintf("Parsing initramfs root directory:\n");
     parse_initramfs_root();
 }

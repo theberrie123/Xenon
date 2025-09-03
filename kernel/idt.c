@@ -138,5 +138,5 @@ void idt_init()
 
         __asm__ __volatile__ ("lidt %0" :: "m"(idtr));
 
-        kprintf("[  %%gOK%%w  ]  Initialized IDT\n");
+        kprintf("%%ginitialized IDT%%w\n");
 }

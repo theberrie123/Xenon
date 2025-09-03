@@ -50,7 +50,7 @@ void pit_init(uint32_t frequency_hz)
 {
         pit_set_frequency(frequency_hz);
 
-        kprintf("[  %%gOK%%w  ]  Initialized PIT with %d Hz\n", frequency_hz);
+        kprintf("%%ginitialized PIT with %d Hz%%w\n", frequency_hz);
 
 }
 

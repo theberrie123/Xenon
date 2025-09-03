@@ -1,6 +1,7 @@
 #include "kernel.h"
 
 
+
 void init()
 {
         kinit();
@@ -21,8 +22,7 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
         init();
 
         if (magic != 0x2BADB002) {
-                kprintf("[  %%rERR%%w ]  not booted with GRUB\n");
-                return;
+                panic("not booted with GRUB\n");
         }
 
         if (mbi->flags & MULTIBOOT_INFO_MODS) {
@@ -40,14 +40,12 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                                         .size = initramfs_size,
                                 };
 
-                                kprintf("[  %%gOK%%w  ]  initramfs module found\n");
-
                                 unpack_to_rootfs(initramfs);
                                 break;
                         }
                 }
         } else {
-                kprintf("[  %%rERR%%w ]  initramfs module not found\n");
+                panic("initramfs module not found\n");
         }
 
         for (;;) __asm__ __volatile__ ("hlt");

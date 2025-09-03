@@ -239,3 +239,66 @@ void kprintf(const char *format, ...)
 
     va_end(args);
 }
+
+__attribute__((noreturn))
+void panic(const char *format, ...)
+{
+
+        tty_set_color(RED_ON_BLACK);
+
+    va_list args;
+    va_start(args, format);
+
+    for (const char *p = format; *p != '\0'; p++) {
+        if (*p == '%') {
+            p++;
+            switch (*p) {
+                case 'c': kputchar((char)va_arg(args, int)); break;
+                case 's': {
+                    const char *s = va_arg(args, const char *);
+                    for (int i = 0; s[i]; i++) kputchar(s[i]);
+                    break;
+                }
+                case 'd': {
+                    char buf[12];
+                    int_to_str(va_arg(args, int), buf);
+                    for (int i = 0; buf[i]; i++) kputchar(buf[i]);
+                    break;
+                }
+                case 'u': {
+                    char buf[12];
+                    int_to_str(va_arg(args, unsigned int), buf);
+                    for (int i = 0; buf[i]; i++) kputchar(buf[i]);
+                    break;
+                }
+                case 'x': {
+                    unsigned int x = va_arg(args, unsigned int);
+                    const char *hex = "0123456789ABCDEF";
+                    for (int i = 28; i >= 0; i -= 4) kputchar(hex[(x >> i) & 0xF]);
+                    break;
+                }
+                case 'p': {
+                    unsigned long addr = (unsigned long)va_arg(args, void *);
+                    kputchar('0'); kputchar('x');
+                    const char *hex = "0123456789ABCDEF";
+                    for (int i = 60; i >= 0; i -= 4) kputchar(hex[(addr >> i) & 0xF]);
+                    break;
+                }
+                case '%': kputchar('%'); break;
+                default: kputchar(*p); break;
+            }
+        } else {
+            kputchar(*p);
+        }
+    }
+
+    va_end(args);
+
+
+        tty_set_color(WHITE_ON_BLACK);
+
+    // Halt CPU indefinitely
+    while (1) {
+        __asm__ volatile("hlt");
+    }
+}

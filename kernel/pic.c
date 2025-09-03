@@ -37,5 +37,5 @@ void pic_init()
         pic_remap(0x20, 0x28);
         pic_set_mask(0xFC, 0xFF);
 
-        kprintf("[  %%gOK%%w  ]  initialized PIC\n");
+        kprintf("%%ginitialized PIC%%w\n");
 }

@@ -33,5 +33,7 @@ void putchar_update_cursor(char c);
 void move_cursor(int dx, int dy);
 void draw_cursor(int x, int y);
 
+__attribute__ ((noreturn))
+void panic(const char *format, ...);
 
 #endif /* TTY_H */
