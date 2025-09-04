@@ -38,15 +38,12 @@ struct task *create_task(void (*entry)())
 void switch_task(uint32_t *old_esp, uint32_t *new_esp)
 {
     __asm__ __volatile__ (
-        // Save current ESP/EBP
         "movl %%esp, (%0)\n"
         "movl %%ebp, 4(%0)\n"
 
-        // Load new ESP/EBP
         "movl (%1), %%esp\n"
         "movl 4(%1), %%ebp\n"
 
-        // Return to new EIP (on stack)
         "ret\n"
         :
         : "r"(old_esp), "r"(new_esp)

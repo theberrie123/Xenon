@@ -40,7 +40,7 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                                         .size = initramfs_size,
                                 };
 
-                                unpack_to_rootfs(initramfs);
+                                initramfs_init(initramfs);
                                 break;
                         }
                 }

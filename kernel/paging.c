@@ -69,25 +69,20 @@ int unmap_page(page_directory_t *pd, uintptr_t vaddr)
 }
 
 void paging_init_identity_4mb(void) {
-    // Clear PD/PT
     for (int i = 0; i < 1024; ++i) {
         kernel_pd.entries[i] = 0;
         first_pt.entries[i]  = 0;
     }
 
-    // Fill first page table: v = p for 0..4MiB
     for (int i = 0; i < 1024; ++i) {
         uintptr_t frame = (uintptr_t)i * PAGE_SIZE;
         first_pt.entries[i] = (pte_t)(frame | P_RW | P_PRESENT); // kernel RW
     }
 
-    // Point PD[0] to first_pt (present + rw)
     kernel_pd.entries[0] = (pde_t)(virt_to_phys(&first_pt) | P_RW | P_PRESENT);
 
-    // Register page fault ISR (interrupt 14)
     isr_register_handler(14, page_fault_isr_wrapper);
 
-    // Enable paging
     paging_enable((page_directory_t*)virt_to_phys(&kernel_pd));
 
     kprintf("%%ginitialized paging%%w\n");

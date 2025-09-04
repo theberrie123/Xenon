@@ -73,7 +73,7 @@ extern unsigned char *initramfs_in_ram;
 struct file_in_ram find_file_in_initramfs(const char *filename);
 
 
-void unpack_to_rootfs(struct initramfs initramfs);
+void initramfs_init(struct initramfs initramfs);
 
 
 #endif /* INITRAMFS_H */

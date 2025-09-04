@@ -4,7 +4,6 @@
 #include "sched/task.h"
 
 
-/* number of PIT ticks since boot */
 static __volatile__ uint64_t jiffies = 0;
 
 static uint32_t pit_hz = 100; /* default */
@@ -21,7 +20,6 @@ void pit_set_frequency(uint32_t frequency_hz)
                 return;
         }
 
-        /* divisor calc with rounding: (input + f/2)/f */
         uint32_t divisor = (PIT_INPUT_FREQ + frequency_hz/2) / frequency_hz;
         if (divisor == 0) {
                 divisor = 1;

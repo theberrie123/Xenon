@@ -1,7 +1,7 @@
-#include "../include/isr.h"
-#include "../include/paging.h"
-#include "../include/tty.h"
-#include "../include/idt.h"
+#include "isr.h"
+#include "paging.h"
+#include "tty.h"
+#include "idt.h"
 
 
 #define ISR_COUNT 32
@@ -29,7 +29,6 @@ void isr_register_handler(uint8_t n, isr_handler_t handler)
         interrupt_handlers[n] = handler;
 }
 
-// Install CPU exceptions into the IDT
 extern void isr_stub_0(void);  extern void isr_stub_1(void);
 extern void isr_stub_2(void);  extern void isr_stub_3(void);
 extern void isr_stub_4(void);  extern void isr_stub_5(void);

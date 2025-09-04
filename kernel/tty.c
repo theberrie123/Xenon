@@ -212,10 +212,10 @@ void kprintf(const char *format, ...)
                     }
                     break;
                 }
-                case 'p': {  // Print pointer (memory address)
+                case 'p': {
                     void *ptr = va_arg(args, void *);
-                    unsigned long addr = (unsigned long)ptr;  // Cast pointer to unsigned long
-                    kputchar('0');  // For "0x" prefix
+                    unsigned long addr = (unsigned long)ptr;
+                    kputchar('0');
                     kputchar('x');
                     
                     const char *hex = "0123456789ABCDEF";
@@ -297,7 +297,6 @@ void panic(const char *format, ...)
 
         tty_set_color(WHITE_ON_BLACK);
 
-    // Halt CPU indefinitely
     while (1) {
         __asm__ volatile("hlt");
     }

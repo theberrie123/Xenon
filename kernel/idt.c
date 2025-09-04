@@ -8,7 +8,6 @@
 static struct idt_entry idt[IDT_SIZE];
 static struct idtr idtr;
 
-/* Forward declarations of ISR stubs */
 #define ISR_NO_ERR_STUB(n)                    \
 void isr_stub_##n(void) __attribute__((naked)); \
 void isr_stub_##n(void) {                      \
@@ -28,7 +27,6 @@ void isr_stub_##n(void) {                      \
         );                                        \
 }
 
-/* Define the 32 CPU exception stubs */
 ISR_NO_ERR_STUB(0)
 ISR_NO_ERR_STUB(1)
 ISR_NO_ERR_STUB(2)
@@ -97,7 +95,6 @@ extern void isr_stub_30(void);
 extern void isr_stub_31(void);
 
 
-/* External declarations for C handlers */
 extern void isr_handler_c(uint32_t int_no, uint32_t err_code);
 extern void irq0_c(void);
 extern void irq1_c(void);
@@ -114,7 +111,6 @@ void (*isr_stubs[32])(void) = {
 };
 
 
-/* IDT set descriptor function */
 void idt_set_entry(uint8_t vector, void *isr, uint8_t flags)
 {
         uintptr_t addr = (uintptr_t)isr;
