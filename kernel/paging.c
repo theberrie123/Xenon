@@ -85,7 +85,6 @@ void paging_init_identity_4mb(void) {
 
     paging_enable((page_directory_t*)virt_to_phys(&kernel_pd));
 
-    kprintf("%%ginitialized paging%%w\n");
 }
 
 void page_fault_isr(uint32_t err_code) {

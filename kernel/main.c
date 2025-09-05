@@ -5,14 +5,23 @@
 void init()
 {
         kinit();
+        kprintf("[%%g  OK  %%w] initialized tty\n");
         gdt_init();
+        kprintf("[%%g  OK  %%w] initialized gdt\n");
         idt_init();
+        kprintf("[%%g  OK  %%w] initialized idt\n");
         isr_init();
+        kprintf("[%%g  OK  %%w] initialized isr\n");
         pic_init();
+        kprintf("[%%g  OK  %%w] initialized pic\n");
         pit_init(100);
+        kprintf("[%%g  OK  %%w] initialized pit\n");
         enable_interrupts();
+        kprintf("[%%g  OK  %%w] enabled interrupts\n");
         paging_init_identity_4mb();
-        scheduler_init();    
+        kprintf("[%%g  OK  %%w] initialized paging\n");
+        scheduler_init();
+        kprintf("[%%g  OK  %%w] initialized scheduler\n");
 }
 
 
@@ -41,6 +50,7 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                                 };
 
                                 initramfs_init(initramfs);
+                                kprintf("[%%g  OK  %%w] initialized initramfs\n");
                                 break;
                         }
                 }

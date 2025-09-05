@@ -138,7 +138,6 @@ void initramfs_init(struct initramfs initramfs)
                 panic("failed to mount initramfs at root\n");
         }
 
-        kprintf("%%ginitialized initramfs%%w\n");
         kprintf("Parsing initramfs root dir:\n");
         parse_initramfs_root();
 }
