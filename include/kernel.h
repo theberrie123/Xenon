@@ -15,6 +15,7 @@
 #include "paging.h"
 #include "sched/task.h"
 #include "elf.h"
+#include "syscall.h"
 
 
 #endif /* KERNEL_H */

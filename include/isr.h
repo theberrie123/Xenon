@@ -3,19 +3,26 @@
 
 
 #include "xenon/type.h"
+#include "kernel.h"
 
 
-typedef struct registers {
-    uint32_t ds;
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t int_no, err_code;
-    uint32_t eip, cs, eflags, useresp, ss;
-} registers_t;
+struct regs {
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t esp;
+    uint32_t ebx;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t eax;
+    uint32_t int_no;    // interrupt number
+    uint32_t err_code;  // error code if any
+};
 
-typedef void (*isr_handler_t)(registers_t*);
+typedef void (*isr_handler_t)(struct regs *);
 
+void isr_handler_c(struct regs *regs);
 void isr_init();
 void isr_register_handler(uint8_t n, isr_handler_t handler);
-void isr_handler_c(registers_t *regs);
 
 #endif /* ISR_H */

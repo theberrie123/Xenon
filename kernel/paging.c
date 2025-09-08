@@ -1,9 +1,9 @@
 #include "paging.h"
 #include "tty.h"
 #include "isr.h"
+#include "kernel.h"
 
-
-static void page_fault_isr_wrapper(registers_t *regs)
+static void page_fault_isr_wrapper(struct regs *regs)
 {
         page_fault_isr(regs->err_code);
 }

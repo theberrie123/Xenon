@@ -2,22 +2,66 @@
 #include "paging.h"
 #include "tty.h"
 #include "idt.h"
+#include "syscall.h"
+#include "kernel.h"
+#include "xenon/type.h"
 
 
 #define ISR_COUNT 32
 
 
+
+
+struct registers {
+        uint32_t eax;
+        uint32_t ebx;
+        uint32_t ecx;
+        uint32_t edx;
+};
+
+struct registers regs;
+
+void isr80_handler_c()
+{
+        char *msg = (char *)regs.ecx;
+        kprintf("eax=%d, ebx=%d, ecx=%s, edx=%d\n", regs.eax, regs.ebx, msg, regs.edx);
+}
+
+
+void isr80_handler(void) __attribute__((naked));
+void isr80_handler(void) {
+        __asm__ __volatile__ (
+                "cli\n\t"
+                "pusha\n\t"
+                "movl %%eax, %0\n\t"
+                "movl %%ebx, %1\n\t"
+                "movl %%ecx, %2\n\t"
+                "movl %%edx, %3\n\t"
+                "call isr80_handler_c\n\t"
+                "popa\n\t"
+                "sti\n\t"
+                "iret\n\t"
+                : "=m"(regs.eax), "=m"(regs.ebx), "=m"(regs.ecx), "=m"(regs.edx)
+                :
+                : "eax", "ebx", "ecx", "edx"
+        );
+}
+
+
+
+
+
+
 static isr_handler_t interrupt_handlers[ISR_COUNT] = {0};
 
-void isr_handler_c(registers_t *regs)
+void isr_handler_c(struct regs *regs)
 {
-        if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
-                interrupt_handlers[regs->int_no](regs);
-                return;
-        }
+    if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
+        interrupt_handlers[regs->int_no](regs);
+        return;
+    }
 
-        panic("unhandled interrupt: %d, err: %x", regs->int_no, regs->err_code);
-
+    panic("unhandled interrupt: %d, err: %x", regs->int_no, regs->err_code);
 }
 
 

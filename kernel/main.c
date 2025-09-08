@@ -1,5 +1,14 @@
 #include "kernel.h"
+#include "syscall.h"
 
+
+
+void sys_print_test(int arg) {
+    kprintf("sys_print_test called with arg = %d\n", arg);
+}
+
+
+extern struct registers r;
 
 
 void init()
@@ -22,9 +31,8 @@ void init()
         kprintf("[%%g  OK  %%w] initialized paging\n");
         scheduler_init();
         kprintf("[%%g  OK  %%w] initialized scheduler\n");
+
 }
-
-
 
 void kmain(unsigned long magic, struct multiboot_info *mbi)
 {
@@ -57,6 +65,22 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
         } else {
                 panic("initramfs module not found\n");
         }
+
+
+// ssize_t write(int fd, const void *buf, size_t count)
+// ssize_t write(1, "# ", 2)
+        char *msg = "# ";
+        __asm__ volatile (
+                "movl $1, %%eax\n\t" // syscall num (1)
+                "movl $1, %%ebx\n\t" // fd (1)
+                "movl %0, %%ecx\n\t" // buf = addr string
+                "movl $2, %%edx\n\t" // count = 2
+                "int $0x80"
+                :
+                : "r"(msg)
+                : "eax", "ebx", "ecx", "edx"
+        );
+
 
         for (;;) __asm__ __volatile__ ("hlt");
 }
