@@ -13,6 +13,10 @@
 #define GREEN_ON_BLACK  0x0A
 #define YELLOW_ON_BLACK 0x0E
 #define RED_ON_BLACK    0x0C
+#define BLUE_ON_BLACK   0x01
+#define CYAN_ON_BLACK   0x03
+
+#define LIGHT_GRAY_ON_BLACK 0x07
 
 
 extern unsigned int *framebuffer;

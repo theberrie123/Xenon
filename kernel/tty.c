@@ -165,6 +165,8 @@ void kprintf(const char *format, ...)
                 case 'w': tty_set_color(WHITE_ON_BLACK); break;
                 case 'y': tty_set_color(YELLOW_ON_BLACK); break;
                 case 'r': tty_set_color(RED_ON_BLACK); break;
+                case 'b': tty_set_color(BLUE_ON_BLACK); break;
+                case 'l': tty_set_color(LIGHT_GRAY_ON_BLACK); break;
                 default: break;
             }
             continue;

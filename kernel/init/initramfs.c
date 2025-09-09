@@ -147,13 +147,14 @@ void init_mount(struct initramfs initramfs) {
     }
 }
 
-/* --- parse initramfs into a dir_entry tree --- */
-void parse_initramfs(void)
-{
+#define S_IFMT  0170000
+#define S_IFDIR 0040000
+#define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
+
+void parse_initramfs(void) {
     if (!initramfs_in_ram) return;
 
-    /* create root if needed */
-    if (!root_entry) root_entry = make_dir_entry("/", ENTRY_DIR, 0, NULL, NULL);
+    root_entry = make_dir_entry("/", ENTRY_DIR, 0, NULL, NULL);
 
     unsigned char *ptr = initramfs_in_ram;
     while (1) {
@@ -162,7 +163,10 @@ void parse_initramfs(void)
 
         unsigned long namesize = hex_to_ulong(hdr->c_namesize, 8);
         unsigned long filesize = hex_to_ulong(hdr->c_filesize, 8);
+        unsigned long mode = hex_to_ulong(hdr->c_mode, 8);
+
         char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
+        unsigned char *data = (unsigned char *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
 
         if ((namesize == 2 && name[0] == '.') ||
             (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
@@ -170,45 +174,51 @@ void parse_initramfs(void)
             continue;
         }
 
-        /* temporary copy path, ensure NUL terminated */
-        char pathbuf[512];
-        unsigned long copy_len = namesize - 1;
-        if (copy_len >= sizeof(pathbuf)) copy_len = sizeof(pathbuf) - 1;
-        for (unsigned long i = 0; i < copy_len; i++) pathbuf[i] = name[i];
-        pathbuf[copy_len] = '\0';
+        // Walk the path manually to build tree correctly
+        struct dir_entry *cur = root_entry;
+        char *p = name;
+        while (*p) {
+            // skip leading '/'
+            if (*p == '/') { p++; continue; }
 
-        /* walk components */
-        struct dir_entry *dir = root_entry;
-        char *p = pathbuf;
-        char *component;
-        while (1) {
-            component = p;
-            char *slash = strchr(p, '/');
-            if (!slash) break;
-            *slash = '\0';
+            // get next path component
+            char part[128];
+            int i = 0;
+            while (*p && *p != '/' && i < (int)sizeof(part)-1) part[i++] = *p++;
+            part[i] = '\0';
 
-            /* find or create directory child */
-            struct dir_entry *sub = NULL;
-            for (unsigned long i = 0; i < dir->child_count; i++) {
-                if (dir->children[i]->type == ENTRY_DIR && strcmp(dir->children[i]->name, component) == 0) {
-                    sub = dir->children[i];
+            // find existing child
+            struct dir_entry *found = NULL;
+            for (unsigned long j = 0; j < cur->child_count; j++) {
+                if (strcmp(cur->children[j]->name, part) == 0) {
+                    found = cur->children[j];
                     break;
                 }
             }
-            if (!sub) {
-                sub = make_dir_entry(component, ENTRY_DIR, 0, NULL, dir);
-                add_child(dir, sub);
+
+            // create new entry if not found
+            if (!found) {
+                int type;
+                if (*p) {
+                    // more path left → directory
+                    type = ENTRY_DIR;
+                } else {
+                    // last component → check mode
+                    type = S_ISDIR(mode) ? ENTRY_DIR : ENTRY_FILE;
+                }
+
+                void *filedata = (type == ENTRY_FILE) ? data : NULL;
+                unsigned long size = (type == ENTRY_FILE) ? filesize : 0;
+
+                found = make_dir_entry(part, type, size, filedata, cur);
+                add_child(cur, found);
             }
 
-            dir = sub;
-            p = slash + 1;
-        }
+            cur = found;
 
-        /* p now points at final component (file or directory name) */
-        int is_file = (filesize > 0);
-        unsigned char *data = is_file ? (ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize)) : NULL;
-        struct dir_entry *entry = make_dir_entry(p, is_file ? ENTRY_FILE : ENTRY_DIR, filesize, data, dir);
-        add_child(dir, entry);
+            // skip '/'
+            while (*p == '/') p++;
+        }
 
         ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
     }
@@ -309,14 +319,20 @@ void print_dir(const char *path)
         kprintf("No such directory: %s\n", path);
         return;
     }
-    if (dir->type != 0) {
+
+    if (dir->type != ENTRY_DIR) {
         kprintf("%s is not a directory\n", path);
         return;
     }
 
+    // Print only immediate children
     for (unsigned long i = 0; i < dir->child_count; i++) {
         struct dir_entry *child = dir->children[i];
-        kprintf("%s%s\n", child->name, child->type == 0 ? "/" : "");
+        if (child->type == ENTRY_DIR) {
+                kprintf("%%l%s%%w\n", child->name);               
+        } else if (child->type == ENTRY_FILE) {
+                kprintf("%s\n", child->name);        
+        }
     }
 }
 
