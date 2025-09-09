@@ -11,7 +11,6 @@
 #define FS_TYPE_TMPFS 1
 #define MAX_MOUNTS 16
 
-
 #define ELF_MAGIC 0x464C457F
 #define PT_LOAD 1
 
@@ -32,6 +31,7 @@ struct file_in_ram {
         unsigned char *data;
         unsigned long size;
 };
+
 
 struct cpio_newc_header {
         char c_magic[6];
