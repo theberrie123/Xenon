@@ -1,13 +1,9 @@
-#include "io.h"
 #include "pit.h"
-#include "tty.h"
-#include "sched/task.h"
 
 
 static __volatile__ uint64_t jiffies = 0;
 
-static uint32_t pit_hz = 100; /* default */
-
+static uint32_t pit_hz = PIT_HZ;
 void pit_tick()
 {
         jiffies++;

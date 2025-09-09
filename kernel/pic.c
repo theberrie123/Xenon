@@ -1,14 +1,10 @@
 #include "pic.h"
-#include "io.h"
-#include "tty.h"
 
 
 void pic_remap(int offset1, int offset2)
 {
-        uint8_t a1, a2;
-
-        a1 = inb(PIC1_DATA);
-        a2 = inb(PIC2_DATA);
+        uint8_t a1 = inb(PIC1_DATA);
+        uint8_t a2 = inb(PIC2_DATA);
 
         outb(PIC1_COMMAND, 0x11);
         outb(PIC2_COMMAND, 0x11);
@@ -36,5 +32,4 @@ void pic_init()
 {
         pic_remap(0x20, 0x28);
         pic_set_mask(0xFC, 0xFF);
-
 }

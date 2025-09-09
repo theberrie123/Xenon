@@ -80,8 +80,5 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
         }
 
 
-        write(1, "# ", 2);
-
-
         for (;;) __asm__ __volatile__ ("hlt");
 }

@@ -7,14 +7,14 @@
 
 extern char __heap_start, __heap_end;
 
-static char *heap_base = &__heap_start;
-static char *heap_end  = &__heap_end;
-static char *heap_ptr  = &__heap_start;
+extern char *heap_base;
+extern char *heap_end;
+extern char *heap_ptr;
 
 
 struct heap_block {
         size_t size;
-        int free; /* 1 = free, 0 = used */
+        int free;
         struct heap_block *next;
         struct heap_block *prev;
 };

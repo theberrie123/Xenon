@@ -23,8 +23,12 @@ struct registers regs;
 
 void isr80_handler_c()
 {
-        char *msg = (char *)regs.ecx;
-        kprintf("eax=%d, ebx=%d, ecx=%s, edx=%d\n", regs.eax, regs.ebx, msg, regs.edx);
+        int fd = regs.ebx;
+        const char *buf = (const char *)regs.ecx;
+        size_t count = (size_t)regs.edx;
+        for (size_t i = 0; i < count; i++) {
+                kputchar(buf[i]);
+        }
 }
 
 
