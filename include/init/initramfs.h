@@ -50,23 +50,6 @@ struct cpio_newc_header {
         char c_check[8];
 };
 
-static unsigned long align4(unsigned long x) {
-    return (x + 3) & ~3;
-}
-
-static unsigned long hex_to_ulong(const char *hex, int len)
-{
-        unsigned long result = 0;
-        for (int i = 0; i < len; i++) {
-                char c = hex[i];
-                result <<= 4;
-                if (c >= '0' && c <= '9') result += c - '0';
-                else if (c >= 'A' && c <= 'F') result += c - 'A' + 10;
-                else if (c >= 'a' && c <= 'f') result += c - 'a' + 10;
-        }
-        return result;
-}
-
 extern unsigned char *initramfs_in_ram;
 
 

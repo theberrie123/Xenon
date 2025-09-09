@@ -26,8 +26,11 @@ void isr80_handler_c()
         int fd = regs.ebx;
         const char *buf = (const char *)regs.ecx;
         size_t count = (size_t)regs.edx;
-        for (size_t i = 0; i < count; i++) {
-                kputchar(buf[i]);
+
+        if (fd == 1) {
+                for (size_t i = 0; i < count; i++) {
+                        kputchar(buf[i]);
+                }
         }
 }
 

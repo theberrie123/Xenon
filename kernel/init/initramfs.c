@@ -7,6 +7,21 @@ static struct mount mount_table[MAX_MOUNTS];
 
 #define ALIGN4(x) (((x) + 3) & ~3)
 
+
+
+static unsigned long hex_to_ulong(const char *hex, int len)
+{
+        unsigned long result = 0;
+        for (int i = 0; i < len; i++) {
+                char c = hex[i];
+                result <<= 4;
+                if (c >= '0' && c <= '9') result += c - '0';
+                else if (c >= 'A' && c <= 'F') result += c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f') result += c - 'a' + 10;
+        }
+        return result;
+}
+
 struct file_in_ram find_file_in_initramfs(const char *path) {
     if (!initramfs_in_ram || !path) {
         struct file_in_ram empty = { NULL, 0 };
@@ -113,7 +128,7 @@ void parse_initramfs_root(void) {
                 kprintf("/");
                 for (unsigned long i = 0; i < namesize - 1; i++)
                         kprintf("%c", name[i]);
-                        kprintf("\n");
+                kprintf("\n");
 
                 ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
         }
