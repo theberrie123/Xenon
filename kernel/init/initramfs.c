@@ -1,27 +1,67 @@
 #include "init/initramfs.h"
 
 unsigned char *initramfs_in_ram = NULL;
+struct dir_entry *root_entry = NULL;   /* define the global root_entry */
 
 static struct mount mount_table[MAX_MOUNTS];
 
-
 #define ALIGN4(x) (((x) + 3) & ~3)
-
-
 
 static unsigned long hex_to_ulong(const char *hex, int len)
 {
-        unsigned long result = 0;
-        for (int i = 0; i < len; i++) {
-                char c = hex[i];
-                result <<= 4;
-                if (c >= '0' && c <= '9') result += c - '0';
-                else if (c >= 'A' && c <= 'F') result += c - 'A' + 10;
-                else if (c >= 'a' && c <= 'f') result += c - 'a' + 10;
-        }
-        return result;
+    unsigned long result = 0;
+    for (int i = 0; i < len; i++) {
+        char c = hex[i];
+        result <<= 4;
+        if (c >= '0' && c <= '9') result += c - '0';
+        else if (c >= 'A' && c <= 'F') result += c - 'A' + 10;
+        else if (c >= 'a' && c <= 'f') result += c - 'a' + 10;
+    }
+    return result;
 }
 
+/* --- helper: make entry --- */
+struct dir_entry *make_dir_entry(const char *name, int type, unsigned long size, void *data, struct dir_entry *parent)
+{
+    struct dir_entry *entry = kmalloc(sizeof(struct dir_entry));
+    if (!entry) panic("kmalloc failed in make_dir_entry\n");
+
+    entry->name = strdup(name);
+    entry->type = type;
+    entry->size = size;
+    entry->data = data;
+    entry->parent = parent;
+    entry->child_count = 0;
+    entry->child_capacity = 0;
+    entry->children = NULL;
+    return entry;
+}
+
+/* --- helper: add child with doubling capacity --- */
+void add_child(struct dir_entry *parent, struct dir_entry *child)
+{
+    if (!parent) return;
+
+    if (parent->child_capacity == 0) {
+        parent->child_capacity = 4;
+        parent->children = kmalloc(sizeof(struct dir_entry *) * parent->child_capacity);
+        if (!parent->children) panic("kmalloc failed in add_child\n");
+    } else if (parent->child_count >= parent->child_capacity) {
+        /* grow: double capacity */
+        unsigned long new_cap = parent->child_capacity * 2;
+        struct dir_entry **new_arr = kmalloc(sizeof(struct dir_entry *) * new_cap);
+        if (!new_arr) panic("kmalloc failed in add_child (grow)\n");
+        /* copy old */
+        for (unsigned long i = 0; i < parent->child_count; i++)
+            new_arr[i] = parent->children[i];
+        /* NOTE: we don't have kfree in this snippet; if you have free replace accordingly */
+        parent->children = new_arr;
+        parent->child_capacity = new_cap;
+    }
+    parent->children[parent->child_count++] = child;
+}
+
+/* --- find raw file in cpio (keeps original behavior) --- */
 struct file_in_ram find_file_in_initramfs(const char *path) {
     if (!initramfs_in_ram || !path) {
         struct file_in_ram empty = { NULL, 0 };
@@ -65,7 +105,7 @@ struct file_in_ram find_file_in_initramfs(const char *path) {
     return empty;
 }
 
-
+/* --- mounts --- */
 int add_mount(const char *mount_point, void *fs_data, int fs_type) {
     for (int i = 0; i < MAX_MOUNTS; i++) {
         if (mount_table[i].mount_point == NULL) {
@@ -79,8 +119,8 @@ int add_mount(const char *mount_point, void *fs_data, int fs_type) {
 }
 
 int mount(const char *mount_point, void *source, int fs_type) {
-        if (!mount_point || !source) {
-                panic("invalid mount point or source\n");
+    if (!mount_point || !source) {
+        panic("invalid mount point or source\n");
     }
 
     switch (fs_type) {
@@ -91,68 +131,203 @@ int mount(const char *mount_point, void *source, int fs_type) {
             break;
 
         default:
-                panic("unknown file system type: %d\n", fs_type);
+            panic("unknown file system type: %d\n", fs_type);
     }
 
     return -1;
 }
 
 void init_mount(struct initramfs initramfs) {
-        if (!initramfs.start || initramfs.size == 0) {
-                panic("initramfs is not loaded properly. start: %d, size: %d", initramfs.start, initramfs.size);
-        }
+    if (!initramfs.start || initramfs.size == 0) {
+        panic("initramfs is not loaded properly. start: %d, size: %d", initramfs.start, initramfs.size);
+    }
 
-        if (mount("/", initramfs.start, FS_TYPE_TMPFS) != 0) {
-                panic("failed to mount initramfs at root\n");
-        }
+    if (mount("/", initramfs.start, FS_TYPE_TMPFS) != 0) {
+        panic("failed to mount initramfs at root\n");
+    }
 }
 
-void parse_initramfs_root(void) {
-        if (!initramfs_in_ram) return;
+/* --- parse initramfs into a dir_entry tree --- */
+void parse_initramfs(void)
+{
+    if (!initramfs_in_ram) return;
 
-        unsigned char *ptr = initramfs_in_ram;
+    /* create root if needed */
+    if (!root_entry) root_entry = make_dir_entry("/", ENTRY_DIR, 0, NULL, NULL);
+
+    unsigned char *ptr = initramfs_in_ram;
+    while (1) {
+        struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
+        if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
+
+        unsigned long namesize = hex_to_ulong(hdr->c_namesize, 8);
+        unsigned long filesize = hex_to_ulong(hdr->c_filesize, 8);
+        char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
+
+        if ((namesize == 2 && name[0] == '.') ||
+            (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
+            ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
+            continue;
+        }
+
+        /* temporary copy path, ensure NUL terminated */
+        char pathbuf[512];
+        unsigned long copy_len = namesize - 1;
+        if (copy_len >= sizeof(pathbuf)) copy_len = sizeof(pathbuf) - 1;
+        for (unsigned long i = 0; i < copy_len; i++) pathbuf[i] = name[i];
+        pathbuf[copy_len] = '\0';
+
+        /* walk components */
+        struct dir_entry *dir = root_entry;
+        char *p = pathbuf;
+        char *component;
         while (1) {
-                struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
-                if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
+            component = p;
+            char *slash = strchr(p, '/');
+            if (!slash) break;
+            *slash = '\0';
 
-                unsigned long namesize = hex_to_ulong(hdr->c_namesize, 8);
-                unsigned long filesize = hex_to_ulong(hdr->c_filesize, 8);
-                char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
-
-                if ((namesize == 2 && name[0] == '.') ||
-                (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
-                        ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
-                        continue;
+            /* find or create directory child */
+            struct dir_entry *sub = NULL;
+            for (unsigned long i = 0; i < dir->child_count; i++) {
+                if (dir->children[i]->type == ENTRY_DIR && strcmp(dir->children[i]->name, component) == 0) {
+                    sub = dir->children[i];
+                    break;
                 }
+            }
+            if (!sub) {
+                sub = make_dir_entry(component, ENTRY_DIR, 0, NULL, dir);
+                add_child(dir, sub);
+            }
 
-                kprintf("/");
-                for (unsigned long i = 0; i < namesize - 1; i++)
-                        kprintf("%c", name[i]);
-                kprintf("\n");
-
-                ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
+            dir = sub;
+            p = slash + 1;
         }
+
+        /* p now points at final component (file or directory name) */
+        int is_file = (filesize > 0);
+        unsigned char *data = is_file ? (ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize)) : NULL;
+        struct dir_entry *entry = make_dir_entry(p, is_file ? ENTRY_FILE : ENTRY_DIR, filesize, data, dir);
+        add_child(dir, entry);
+
+        ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
+    }
 }
 
+/* --- existing parse_initramfs_root kept for debug if you want --- */
+void parse_initramfs_root(void) {
+    if (!initramfs_in_ram) return;
+
+    unsigned char *ptr = initramfs_in_ram;
+    while (1) {
+        struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
+        if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
+
+        unsigned long namesize = hex_to_ulong(hdr->c_namesize, 8);
+        unsigned long filesize = hex_to_ulong(hdr->c_filesize, 8);
+        char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
+
+        if ((namesize == 2 && name[0] == '.') ||
+            (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
+            ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
+            continue;
+        }
+
+        kprintf("/");
+        for (unsigned long i = 0; i < namesize - 1; i++)
+            kprintf("%c", name[i]);
+        kprintf("\n");
+
+        ptr += ALIGN4(sizeof(struct cpio_newc_header) + namesize + filesize);
+    }
+}
+
+/* --- initramfs_init now copies and parses --- */
 void initramfs_init(struct initramfs initramfs)
 {
-        if (!initramfs.start || initramfs.size == 0) {
-                panic("initramfs is not loaded properly\n");
-        }
+    if (!initramfs.start || initramfs.size == 0) {
+        panic("initramfs is not loaded properly\n");
+    }
 
-        initramfs_in_ram = (unsigned char *) kmalloc(initramfs.size);
-        if (!initramfs_in_ram) {
-                panic("failed to allocate memory for initramfs\n");
-        }
+    initramfs_in_ram = (unsigned char *) kmalloc(initramfs.size);
+    if (!initramfs_in_ram) {
+        panic("failed to allocate memory for initramfs\n");
+    }
 
-        for (unsigned long i = 0; i < initramfs.size; i++) {
-                initramfs_in_ram[i] = initramfs.start[i];
-        }
+    for (unsigned long i = 0; i < initramfs.size; i++) {
+        initramfs_in_ram[i] = initramfs.start[i];
+    }
 
-        if (mount("/", initramfs_in_ram, FS_TYPE_TMPFS) != 0) {
-                panic("failed to mount initramfs at root\n");
-        }
+    if (mount("/", initramfs_in_ram, FS_TYPE_TMPFS) != 0) {
+        panic("failed to mount initramfs at root\n");
+    }
 
-        kprintf("Parsing initramfs root dir:\n");
-        parse_initramfs_root();
+    parse_initramfs();
 }
+
+/* --- find_entry / print_dir / test (unchanged except kstrdup fix) --- */
+struct dir_entry *find_entry(const char *path) {
+    if (!path || !root_entry) return NULL;
+
+    if (strcmp(path, "/") == 0) return root_entry;
+
+    struct dir_entry *dir = root_entry;
+    const char *token = path;
+    if (*token == '/') token++;
+
+    char part[128];
+    while (*token) {
+        int len = 0;
+        while (*token && *token != '/' && len < (int)(sizeof(part)-1)) {
+            part[len++] = *token++;
+        }
+        part[len] = '\0';
+        while (*token == '/') token++;
+
+        struct dir_entry *next = NULL;
+        if (dir->type != ENTRY_DIR) return NULL;
+
+        for (unsigned long i = 0; i < dir->child_count; i++) {
+            if (strcmp(dir->children[i]->name, part) == 0) {
+                next = dir->children[i];
+                break;
+            }
+        }
+
+        if (!next) return NULL;
+        dir = next;
+    }
+
+    return dir;
+}
+
+void print_dir(const char *path)
+{
+    struct dir_entry *dir = find_entry(path);
+
+    if (!dir) {
+        kprintf("No such directory: %s\n", path);
+        return;
+    }
+    if (dir->type != 0) {
+        kprintf("%s is not a directory\n", path);
+        return;
+    }
+
+    for (unsigned long i = 0; i < dir->child_count; i++) {
+        struct dir_entry *child = dir->children[i];
+        kprintf("%s%s\n", child->name, child->type == 0 ? "/" : "");
+    }
+}
+
+
+void test()
+{
+    struct dir_entry *f = find_entry("/bin");
+    if (f && f->type == ENTRY_DIR) {
+        kprintf("Dir %s\n", f->name);
+    } else {
+        kprintf("Dir not found\n");
+    }
+}
+

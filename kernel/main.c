@@ -79,6 +79,7 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
                 panic("initramfs module not found\n");
         }
 
+        print_dir("/");
 
         for (;;) __asm__ __volatile__ ("hlt");
 }
