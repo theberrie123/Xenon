@@ -130,9 +130,11 @@ void idt_init()
         idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
 
         extern void irq0_handler();
+
         extern void isr80_handler();
 
         idt_set_entry(32, irq0_handler, 0x8E);
+
         idt_set_entry(0x80, isr80_handler, 0x8E);
 
         __asm__ __volatile__ ("lidt %0" :: "m"(idtr));

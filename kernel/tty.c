@@ -88,7 +88,6 @@ void kputchar(char c)
         tty_move_cursor(cursor_row, cursor_col);
 }
 
-
 void tty_set_color(uint8_t color)
 {
         KCOLOR = color;

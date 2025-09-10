@@ -5,7 +5,7 @@
 #include "syscall.h"
 #include "kernel.h"
 #include "xenon/type.h"
-
+#include "irq.h"
 
 #define ISR_COUNT 32
 
@@ -21,17 +21,28 @@ struct registers {
 
 struct registers regs;
 
-void isr80_handler_c()
-{
-        int fd = regs.ebx;
-        const char *buf = (const char *)regs.ecx;
-        size_t count = (size_t)regs.edx;
+#define SYS_WRITE 1
 
-        if (fd == 1) {
-                for (size_t i = 0; i < count; i++) {
-                        kputchar(buf[i]);
+
+int isr80_handler_c()
+{
+    switch (regs.eax) {
+        case SYS_WRITE: {
+            int write_fd = regs.ebx;
+            const char *write_buf = (const char *)regs.ecx;
+            size_t write_count = (size_t)regs.edx;
+
+            /* stdout */
+            if (write_fd == 1) {
+                for (size_t i = 0; i < write_count; i++) {
+                    kputchar(write_buf[i]);
                 }
+            }
+
+            return write_count;
         }
+    }
+    return -1; // unknown syscall
 }
 
 

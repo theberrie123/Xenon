@@ -1,10 +1,12 @@
 #ifndef INITRAMFS_H
 #define INITRAMFS_H
 
+
 #include "xenon/string.h"
 #include "xenon/type.h"
 #include "xenon/memory.h"
 #include "tty.h"
+
 
 #define FS_TYPE_TMPFS 1
 #define MAX_MOUNTS 16
@@ -14,6 +16,13 @@
 
 #define ENTRY_DIR  0
 #define ENTRY_FILE 1
+
+#define ALIGN4(x) (((x) + 3) & ~3)
+
+#define S_IFMT 0170000
+#define S_IFDIR 0040000
+#define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
+
 
 struct mount {
     char *mount_point;

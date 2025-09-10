@@ -29,6 +29,7 @@ void tty_move_cursor(size_t row, size_t col);
 
 void kprintf(const char *format, ...);
 
+
 void kexit(int code);
 
 void update_cursor();

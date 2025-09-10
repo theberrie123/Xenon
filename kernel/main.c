@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include "syscall.h"
-
+#include "irq.h"
 
 
 void sys_print_test(int arg) {
@@ -47,6 +47,9 @@ void write(int fd, const void *buf, size_t count)
 }
 
 
+
+
+
 void kmain(unsigned long magic, struct multiboot_info *mbi)
 {
         init();
@@ -80,6 +83,8 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
         }
 
         print_dir("/");
+
+        write(1, "# ", 2);
 
         for (;;) __asm__ __volatile__ ("hlt");
 }

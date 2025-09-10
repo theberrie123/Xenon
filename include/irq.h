@@ -6,6 +6,6 @@
 
 
 void irq0_handler();
-void irq1_handler();
+
 
 #endif /* IRQ_H */
