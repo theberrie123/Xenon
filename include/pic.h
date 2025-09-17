@@ -14,7 +14,7 @@
 
 
 void pic_init();
-void pic_set_mask(uint8_t mask1, uint8_t mask2);
+void pic_set_mask(UINT8 mask1, UINT8 mask2);
 void pic_remap(int offset1, int offset2);
 
 

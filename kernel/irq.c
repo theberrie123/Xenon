@@ -1,6 +1,6 @@
 #include "irq.h"
-#include "sched/task.h"
 #include "pit.h"
+
 
 __attribute__((naked))
 void irq0_handler()

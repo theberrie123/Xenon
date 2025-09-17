@@ -4,9 +4,9 @@
 #include "xenon/memory.h"
 
 
-size_t strlen(const char *s)
+SIZE strlen(const char *s)
 {
-        size_t len = 0;
+        SIZE len = 0;
         while (s[len] != '\0') {
                 len++;
         }
@@ -15,20 +15,20 @@ size_t strlen(const char *s)
 
 char *strdup(const char *s)
 {
-        size_t len = strlen(s);
+        SIZE len = strlen(s);
 
         char *copy = (char *)kmalloc(len + 1);
-        for (size_t i = 0; i <= len; i++) {
+        for (SIZE i = 0; i <= len; i++) {
                 copy[i] = s[i];
         }
         return copy;
 }
 
-int strncmp(const char *s1, const char *s2, size_t n)
+int strncmp(const char *s1, const char *s2, SIZE n)
 {
-        for (size_t i = 0; i < n; i++) {
-                unsigned char c1 = (unsigned char)s1[i];
-                unsigned char c2 = (unsigned char)s2[i];
+        for (SIZE i = 0; i < n; i++) {
+                UINT8 c1 = (UINT8)s1[i];
+                UINT8 c2 = (UINT8)s2[i];
 
                 if (c1 != c2) {
                         return (int)c1 - (int)c2;
@@ -60,7 +60,7 @@ int strcmp(const char *s1, const char *s2)
                 s1++;
                 s2++;
         }
-        return (unsigned char)*s1 - (unsigned char)*s2;
+        return (UINT8)*s1 - (UINT8)*s2;
 }
 
 char *strcat(char *dest, const char *s)
@@ -82,42 +82,42 @@ char *strcat(char *dest, const char *s)
         return ret;
 }
 
-void *memset(void *dest, int value, size_t count)
+void *memset(void *dest, int value, SIZE count)
 {
-        unsigned char *ptr = (unsigned char *)dest;
-        for (unsigned int i = 0; i < count; i++) {
-                ptr[i] = (unsigned char)value;
+        UINT8 *ptr = (UINT8 *)dest;
+        for (UINT32 i = 0; i < count; i++) {
+                ptr[i] = (UINT8)value;
         }
         return dest;
 }
 
-void *memcpy(void *dest, const void *s, size_t count)
+void *memcpy(void *dest, const void *s, SIZE count)
 {
-        unsigned char *d = (unsigned char *)dest;
-        const unsigned char *str = (const unsigned char *)s;
-        for (unsigned int i = 0; i < count; i++) {
+        UINT8 *d = (UINT8 *)dest;
+        const UINT8 *str = (const UINT8 *)s;
+        for (UINT32 i = 0; i < count; i++) {
                 d[i] = str[i];
         }
         return dest;
 }
 
-char *strncpy(char *dest, const char *s, size_t n)
+char *strncpy(char *dest, const char *s, SIZE n)
 {
         for (unsigned i = 0; i < n && s[i] != '\0'; i++) {
                 dest[i] = s[i];
         }
-        for (size_t i = 0; i < n; i++) {
+        for (SIZE i = 0; i < n; i++) {
                 dest[i] = '\0';
         }
         return dest;
 }
 
-int memcmp(const void *s1, const void *s2, size_t n)
+int memcmp(const void *s1, const void *s2, SIZE n)
 {
-        const unsigned char *p1 = (const unsigned char *)s1;
-        const unsigned char *p2 = (const unsigned char *)s2;
+        const UINT8 *p1 = (const UINT8 *)s1;
+        const UINT8 *p2 = (const UINT8 *)s2;
 
-        for (size_t i = 0; i < n; i++) {
+        for (SIZE i = 0; i < n; i++) {
                 if (p1[i] != p2[i]) {
                         return (p1[i] < p2[i]) ? -1 : 1;
                 }
@@ -173,11 +173,11 @@ const char *strrchr(const char *s, char c)
 
 unsigned long strtol(const char *s, char **endptr, int base)
 {
-        unsigned long result = 0;
+        SIZE result = 0;
         char c;
 
         while ((c = *s++) != 0) {
-                unsigned int val;
+                UINT32 val;
                 if (c >= '0' && c <= '9') {
                         val = c - '0';
                 } else if (c >= 'A' && c <= 'F') {
@@ -188,7 +188,7 @@ unsigned long strtol(const char *s, char **endptr, int base)
                         break;
                 }
 
-                if (val >= (unsigned int)base) {
+                if (val >= (UINT32)base) {
                         break;
                 }
 
@@ -201,13 +201,13 @@ unsigned long strtol(const char *s, char **endptr, int base)
 }
 
 
-int snprintf(char *buf, size_t size, 
+int snprintf(char *buf, SIZE size, 
                     const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    size_t pos = 0;
-    for (size_t i = 0; fmt[i] != '\0'; i++) {
+    SIZE pos = 0;
+    for (SIZE i = 0; fmt[i] != '\0'; i++) {
         if (fmt[i] == '%' && fmt[i + 1] != '\0') {
             i++;
             char temp[64];
@@ -221,7 +221,7 @@ int snprintf(char *buf, size_t size,
                 }
                 case 's': {
                     char *s = va_arg(args, char *);
-                    for (size_t j = 0; s[j] != '\0'; j++) {
+                    for (SIZE j = 0; s[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = s[j];
                         pos++;
                     }
@@ -230,7 +230,7 @@ int snprintf(char *buf, size_t size,
                 case 'd': {
                     int d = va_arg(args, int);
                     itoa(d, temp, 10);
-                    for (size_t j = 0; temp[j] != '\0'; j++) {
+                    for (SIZE j = 0; temp[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = temp[j];
                         pos++;
                     }
@@ -239,7 +239,7 @@ int snprintf(char *buf, size_t size,
                 case 'x': {
                     int x = va_arg(args, int);
                     itoa(x, temp, 16);
-                    for (size_t j = 0; temp[j] != '\0'; j++) {
+                    for (SIZE j = 0; temp[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = temp[j];
                         pos++;
                     }
@@ -251,7 +251,6 @@ int snprintf(char *buf, size_t size,
                     break;
                 }
                 default:
-                    // Unsupported specifier, just print it
                     if (pos + 1 < size) buf[pos] = fmt[i];
                     pos++;
             }
@@ -261,7 +260,6 @@ int snprintf(char *buf, size_t size,
         }
     }
 
-    // Null terminate
     if (size > 0) {
         buf[(pos < size) ? pos : size - 1] = '\0';
     }
@@ -272,12 +270,11 @@ int snprintf(char *buf, size_t size,
 
 char *strtok(char *str, const char *delim)
 {
-    static char *next; // keeps track of the next token start
-    if (str) next = str; // first call
+    static char *next;
+    if (str) next = str;
 
-    if (!next) return NULL; // no more tokens
+    if (!next) return NULL;
 
-    // Skip leading delimiters
     while (*next) {
         int is_delim = 0;
         for (const char *d = delim; *d; d++) {
@@ -290,12 +287,10 @@ char *strtok(char *str, const char *delim)
         next++;
     }
 
-    if (*next == '\0') return NULL; // reached end
+    if (*next == '\0') return NULL;
 
-    // Start of token
     char *start = next;
 
-    // Find the end of the token
     while (*next) {
         int is_delim = 0;
         for (const char *d = delim; *d; d++) {
@@ -305,14 +300,13 @@ char *strtok(char *str, const char *delim)
             }
         }
         if (is_delim) {
-            *next = '\0'; // terminate token
-            next++;       // move past the delimiter
+            *next = '\0';
+            next++;
             return start;
         }
         next++;
     }
 
-    // Last token
     next = NULL;
     return start;
 }

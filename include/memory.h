@@ -10,29 +10,21 @@
 
 
 typedef struct mem_block {
-        /*
-         * payload size in bytes (not including header)
-         * guard word
-         * 1 = free, 0 = used
-         * pad to keep header 16-byte aligned
-         * next block in address order
-         */
-        size_t size;
-        uint32_t magic;
-        uint8_t free;
-        uint8_t _pad[3];
+        SIZE size;
+        UINT32 magic;
+        UINT8 free;
+        UINT8 _pad[3];
         struct mem_block *next;
 } mem_block_t;
 
 
 #define BLOCK_SIZE   (sizeof(mem_block_t))
 
-/* Alignment helper */
 #define ALIGN_UP(x,a)   (((x) + ((a)-1)) & ~((a)-1))
 
 
-extern uint8_t __heap_start;
-extern uint8_t __heap_end;
+extern UINT8 __heap_start;
+extern UINT8 __heap_end;
 
 
 static inline void kheap_lock()
@@ -47,10 +39,10 @@ static inline void kheap_unlock()
 
 
 void kheap_init();
-void *kmalloc(size_t size);
+void *kmalloc(SIZE size);
 void kfree(void *ptr);
-void *krealloc(void *ptr, size_t new_size);
-void *kcalloc(size_t n, size_t size);
+void *krealloc(void *ptr, SIZE new_size);
+void *kcalloc(SIZE n, SIZE size);
 
 
 #endif /* MEMORY_H */

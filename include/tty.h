@@ -19,13 +19,13 @@
 #define LIGHT_GRAY_ON_BLACK 0x07
 
 
-extern unsigned int *framebuffer;
+extern UINT32 *framebuffer;
 
 void kinit();
 void kputchar(char c);
 void kclear();
-void tty_set_color(uint8_t color);
-void tty_move_cursor(size_t row, size_t col);
+void tty_set_color(UINT8 color);
+void tty_move_cursor(SIZE row, SIZE col);
 
 void kprintf(const char *format, ...);
 
@@ -38,7 +38,11 @@ void putchar_update_cursor(char c);
 void move_cursor(int dx, int dy);
 void draw_cursor(int x, int y);
 
+
+void cursor_backward();
+
 __attribute__ ((noreturn))
 void panic(const char *format, ...);
+
 
 #endif /* TTY_H */

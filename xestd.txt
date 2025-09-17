@@ -1,2 +1,0 @@
-sudo cp ~/Desktop/Xenon/include/xestd.h /usr/local/include/
-

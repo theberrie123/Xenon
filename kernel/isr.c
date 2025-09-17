@@ -7,16 +7,17 @@
 #include "xenon/type.h"
 #include "irq.h"
 
+
 #define ISR_COUNT 32
 
 
 
 
 struct registers {
-        uint32_t eax;
-        uint32_t ebx;
-        uint32_t ecx;
-        uint32_t edx;
+        UINT32 eax;
+        UINT32 ebx;
+        UINT32 ecx;
+        UINT32 edx;
 };
 
 struct registers regs;
@@ -26,23 +27,23 @@ struct registers regs;
 
 int isr80_handler_c()
 {
-    switch (regs.eax) {
-        case SYS_WRITE: {
-            int write_fd = regs.ebx;
-            const char *write_buf = (const char *)regs.ecx;
-            size_t write_count = (size_t)regs.edx;
+        switch (regs.eax) {
+                case SYS_WRITE:
+                        int write_fd = regs.ebx;
+                        const char *write_buf = (const char *)regs.ecx;
+                        SIZE write_count = (SIZE)regs.edx;
 
-            /* stdout */
-            if (write_fd == 1) {
-                for (size_t i = 0; i < write_count; i++) {
-                    kputchar(write_buf[i]);
-                }
-            }
+                        /* stdout */
+                        if (write_fd == 1) {
+                                for (SIZE i = 0; i < write_count; i++) {
+                                        kputchar(write_buf[i]);
+                                }
+                        }
 
-            return write_count;
+                        return write_count;
         }
-    }
-    return -1; // unknown syscall
+
+        return -1;
 }
 
 
@@ -74,18 +75,18 @@ static isr_handler_t interrupt_handlers[ISR_COUNT] = {0};
 
 void isr_handler_c(struct regs *regs)
 {
-    if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
-        interrupt_handlers[regs->int_no](regs);
-        return;
-    }
+        if (regs->int_no < ISR_COUNT && interrupt_handlers[regs->int_no]) {
+                interrupt_handlers[regs->int_no](regs);
+                return;
+        }
 
-    panic("unhandled interrupt: %d, err: %x", regs->int_no, regs->err_code);
+        panic("unhandled interrupt: %d, err: %x", regs->int_no, regs->err_code);
 }
 
 
 
 
-void isr_register_handler(uint8_t n, isr_handler_t handler)
+void isr_register_handler(UINT8 n, isr_handler_t handler)
 {
     if (n < ISR_COUNT)
         interrupt_handlers[n] = handler;
@@ -121,7 +122,7 @@ static void* isr_stubs[ISR_COUNT] = {
 
 void isr_init()
 {
-        for (uint8_t i = 0; i < ISR_COUNT; i++) {
+        for (UINT8 i = 0; i < ISR_COUNT; i++) {
                 idt_set_entry(i, isr_stubs[i], 0x8E);
         }
 }

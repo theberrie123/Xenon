@@ -2,10 +2,10 @@
 #define IO_H
 
 
-#include <xenon/type.h>
+#include "xenon/type.h"
 
 
-uint8_t inb(uint16_t port);
-void outb(uint16_t port, uint8_t val);
+UINT8 inb(UINT16 port);
+void outb(UINT16 port, UINT8 val);
 
 #endif /* IO_H */

@@ -1,11 +1,7 @@
 #include "kernel.h"
 #include "syscall.h"
-#include "irq.h"
 
 
-void sys_print_test(int arg) {
-    kprintf("sys_print_test called with arg = %d\n", arg);
-}
 
 
 void init()
@@ -20,37 +16,32 @@ void init()
         kprintf("[%%g  OK  %%w] initialized isr\n");
         pic_init();
         kprintf("[%%g  OK  %%w] initialized pic\n");
-        pit_init(100);
+        pit_init();
         kprintf("[%%g  OK  %%w] initialized pit\n");
         enable_interrupts();
         kprintf("[%%g  OK  %%w] enabled interrupts\n");
         paging_init_identity_4mb();
         kprintf("[%%g  OK  %%w] initialized paging\n");
-        scheduler_init();
-        kprintf("[%%g  OK  %%w] initialized scheduler\n");
 
 }
 
-void write(int fd, const void *buf, size_t count)
+void write(int fd, const void *buf, SIZE count)
 {
-    register int r_fd  asm("ebx") = fd;
-    register const void *r_buf asm("ecx") = buf;
-    register size_t r_count asm("edx") = count;
+        register int write_register_fd __asm__ ("ebx") = fd;
+        register const void *write_register_buf __asm__ ("ecx") = buf;
+        register SIZE write_register_count __asm__ ("edx") = count;
 
-    __asm__ __volatile__ (
-        "movl $1, %%eax\n\t"
-        "int $0x80"
-        :
-        : "b"(r_fd), "c"(r_buf), "d"(r_count)
-        : "eax"
-    );
+        __asm__ __volatile__ (
+                "movl $1, %%eax\n\t"
+                "int $0x80"
+                :
+                : "b"(write_register_fd), "c"(write_register_buf), "d"(write_register_count)
+                : "eax"
+        );
 }
 
 
-
-
-
-void kmain(unsigned long magic, struct multiboot_info *mbi)
+void kmain(SIZE magic, struct multiboot_info *mbi)
 {
         init();
 
@@ -60,12 +51,12 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
 
         if (mbi->flags & MULTIBOOT_INFO_MODS) {
                 struct multiboot_module *mods = (struct multiboot_module *) mbi->mods_addr;
-                for (unsigned int i = 0; i < mbi->mods_count; i++) {
+                for (UINT32 i = 0; i < mbi->mods_count; i++) {
                         struct multiboot_module *mod = &mods[i];
                         if (mod->mod_start && mod->mod_end) {
-                                unsigned char *initramfs_start = (unsigned char *) mod->mod_start;
-                                unsigned char *initramfs_end = (unsigned char *) mod->mod_end;
-                                unsigned long initramfs_size = mod->mod_end - mod->mod_start;
+                                UINT8 *initramfs_start = (UINT8 *) mod->mod_start;
+                                UINT8 *initramfs_end = (UINT8 *) mod->mod_end;
+                                SIZE initramfs_size = mod->mod_end - mod->mod_start;
 
                                 struct initramfs initramfs = {
                                         .start = initramfs_start,
@@ -84,7 +75,9 @@ void kmain(unsigned long magic, struct multiboot_info *mbi)
 
         print_dir("/");
 
+
         write(1, "# ", 2);
+        
 
         for (;;) __asm__ __volatile__ ("hlt");
 }

@@ -1,22 +1,21 @@
 #include "pit.h"
 
 
-static __volatile__ uint64_t jiffies = 0;
+static __volatile__ UINT64 jiffies = 0;
 
-static uint32_t pit_hz = PIT_HZ;
+
 void pit_tick()
 {
         jiffies++;
-        schedule();
 }
 
-void pit_set_frequency(uint32_t frequency_hz)
+void pit_set_frequency(UINT32 frequency_hz)
 {
         if (frequency_hz == 0) {
                 return;
         }
 
-        uint32_t divisor = (PIT_INPUT_FREQ + frequency_hz/2) / frequency_hz;
+        UINT32 divisor = (PIT_INPUT_FREQ + frequency_hz/2) / frequency_hz;
         if (divisor == 0) {
                 divisor = 1;
         }
@@ -24,31 +23,21 @@ void pit_set_frequency(uint32_t frequency_hz)
                 divisor = 0xFFFF;
         }
 
-        /* command byte:
-        *       00 11 011 0
-        *       bits 7-6: select channel (00 = channel 0)
-        *       bits 5-4: access mode (11 = lobyte/hibyte)
-        *       bits 3-1: mode (011 = mode 3 square wave)
-        *       bit 0: BCD (0 = 16-bit binary)
-        */
-        outb(PIT_COMMAND_PORT, 0x36); /* 0x36 = 00 11 011 0 */
-        uint8_t lo = divisor & 0xFF;
-        uint8_t hi = (divisor >> 8) & 0xFF;
+        outb(PIT_COMMAND_PORT, 0x36); 
+        UINT8 lo = divisor & 0xFF;
+        UINT8 hi = (divisor >> 8) & 0xFF;
         outb(PIT_CHANNEL0_PORT, lo);
         outb(PIT_CHANNEL0_PORT, hi);
-
-        pit_hz = frequency_hz;
 }
 
-void pit_init(uint32_t frequency_hz)
+void pit_init()
 {
-        pit_set_frequency(frequency_hz);
+        pit_set_frequency((UINT32)PIT_HZ);
 
 }
 
-uint64_t get_jiffies()
+UINT64 get_jiffies()
 {
-        uint64_t v;
-        v = jiffies;
+        UINT64 v = jiffies;
         return v;
 }

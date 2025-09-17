@@ -2,32 +2,29 @@
 #define TYPES_H
 
 
-typedef unsigned char           uint8_t;
-typedef unsigned short          uint16_t;
-typedef unsigned int            uint32_t;
-typedef unsigned long long      uint64_t;
+typedef unsigned char UINT8;
+typedef unsigned short UINT16;
+typedef unsigned int UINT32;
+typedef unsigned long long UINT64;
 
-typedef signed char             int8_t;
-typedef signed short            int16_t;
-typedef signed int              int32_t;
-typedef signed long long        int64_t;
+typedef signed char INT8;
+typedef signed short INT16;
+typedef signed int INT32;
+typedef signed long long INT64;
 
-typedef unsigned int            uintptr_t;
-typedef signed int              intptr_t;
-
+typedef unsigned long SIZE;
+typedef long SSIZE;
 
 
 typedef enum {
     BOOL_FALSE = 0,
     BOOL_TRUE  = 1
-} bool_t;
+} BOOL;
 
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
 
-typedef unsigned long           size_t;
-typedef long                    ssize_t;
 
 #if defined(__SIZE_MAX__)
     #define SIZE_MAX __SIZE_MAX__

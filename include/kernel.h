@@ -13,9 +13,9 @@
 #include "init/initramfs.h"
 #include "isr.h"
 #include "paging.h"
-#include "sched/task.h"
 #include "elf.h"
 #include "syscall.h"
+#include "irq.h"
 
 
 #endif /* KERNEL_H */

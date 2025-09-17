@@ -7,22 +7,22 @@
 
 
 struct regs {
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t ebp;
-    uint32_t esp;
-    uint32_t ebx;
-    uint32_t edx;
-    uint32_t ecx;
-    uint32_t eax;
-    uint32_t int_no;    // interrupt number
-    uint32_t err_code;  // error code if any
+        UINT32 edi;
+        UINT32 esi;
+        UINT32 ebp;
+        UINT32 esp;
+        UINT32 ebx;
+        UINT32 edx;
+        UINT32 ecx;
+        UINT32 eax;
+        UINT32 int_no;
+        UINT32 err_code;
 };
 
 typedef void (*isr_handler_t)(struct regs *);
 
 void isr_handler_c(struct regs *regs);
 void isr_init();
-void isr_register_handler(uint8_t n, isr_handler_t handler);
+void isr_register_handler(UINT8 n, isr_handler_t handler);
 
 #endif /* ISR_H */
