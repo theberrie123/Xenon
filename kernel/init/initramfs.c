@@ -1,14 +1,14 @@
 #include "init/initramfs.h"
 
-UINT8 *initramfs_in_ram = NULL;
+uint8_t *initramfs_in_ram = NULL;
 struct dir_entry *root_entry = NULL;
 
 static struct mount mount_table[MAX_MOUNTS];
 
 
-static SIZE hex_to_ulong(const char *hex, int len)
+static size_t hex_to_ulong(const char *hex, int len)
 {
-        SIZE result = 0;
+        size_t result = 0;
         for (int i = 0; i < len; i++) {
                 char c = hex[i];
                 result <<= 4;
@@ -19,7 +19,7 @@ static SIZE hex_to_ulong(const char *hex, int len)
         return result;
 }
 
-struct dir_entry *make_dir_entry(const char *name, int type, SIZE size, void *data, struct dir_entry *parent)
+struct dir_entry *make_dir_entry(const char *name, int type, size_t size, void *data, struct dir_entry *parent)
 {
         struct dir_entry *entry = kmalloc(sizeof(struct dir_entry));
         if (!entry) {
@@ -50,7 +50,7 @@ void add_child(struct dir_entry *parent, struct dir_entry *child)
                 unsigned long new_cap = parent->child_capacity * 2;
                 struct dir_entry **new_arr = kmalloc(sizeof(struct dir_entry *) * new_cap);
                 if (!new_arr) panic("kmalloc failed in add_child (grow)\n");
-                for (SIZE i = 0; i < parent->child_count; i++)
+                for (size_t i = 0; i < parent->child_count; i++)
                         new_arr[i] = parent->children[i];
                 parent->children = new_arr;
                 parent->child_capacity = new_cap;
@@ -59,24 +59,26 @@ void add_child(struct dir_entry *parent, struct dir_entry *child)
 }
 
 struct file_in_ram find_file_in_initramfs(const char *path) {
-    if (!initramfs_in_ram || !path) {
-        struct file_in_ram empty = { NULL, 0 };
-        return empty;
-    }
+        if (!initramfs_in_ram || !path) {
+                struct file_in_ram empty = { NULL, 0 };
+                return empty;
+        }
 
-    const char *search_path = path;
-    if (search_path[0] == '/') search_path++;
+        const char *search_path = path;
+        if (search_path[0] == '/') {
+                search_path++;
+        }
 
-    for (UINT8 *ptr = initramfs_in_ram;;) {
+    for (uint8_t *ptr = initramfs_in_ram;;) {
         struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
 
         if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
 
-        SIZE namesize = hex_to_ulong(hdr->c_namesize, 8);
-        SIZE filesize = hex_to_ulong(hdr->c_filesize, 8);
+        size_t namesize = hex_to_ulong(hdr->c_namesize, 8);
+        size_t filesize = hex_to_ulong(hdr->c_filesize, 8);
 
         char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
-        UINT8 *data = (unsigned char *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
+        uint8_t *data = (unsigned char *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
 
         if ((namesize == 2 && name[0] == '.') ||
             (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
@@ -84,7 +86,7 @@ struct file_in_ram find_file_in_initramfs(const char *path) {
             continue;
         }
 
-        SIZE name_len = namesize - 1;
+        size_t name_len = namesize - 1;
 
         if (strlen(search_path) == name_len &&
             strncmp(name, search_path, name_len) == 0) {
@@ -145,17 +147,17 @@ void parse_initramfs(void) {
 
     root_entry = make_dir_entry("/", ENTRY_DIR, 0, NULL, NULL);
 
-    for (UINT8 *ptr = initramfs_in_ram;;) {
+    for (uint8_t *ptr = initramfs_in_ram;;) {
         struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
 
         if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
 
-        SIZE namesize = hex_to_ulong(hdr->c_namesize, 8);
-        SIZE filesize = hex_to_ulong(hdr->c_filesize, 8);
-        SIZE mode = hex_to_ulong(hdr->c_mode, 8);
+        size_t namesize = hex_to_ulong(hdr->c_namesize, 8);
+        size_t filesize = hex_to_ulong(hdr->c_filesize, 8);
+        size_t mode = hex_to_ulong(hdr->c_mode, 8);
 
         char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
-        UINT8 *data = (UINT8 *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
+        uint8_t *data = (uint8_t *)(ptr + sizeof(struct cpio_newc_header) + ALIGN4(namesize));
 
         if ((namesize == 2 && name[0] == '.') ||
             (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0)) {
@@ -174,7 +176,7 @@ void parse_initramfs(void) {
             part[i] = '\0';
 
             struct dir_entry *found = NULL;
-            for (SIZE j = 0; j < cur->child_count; j++) {
+            for (size_t j = 0; j < cur->child_count; j++) {
                 if (strcmp(cur->children[j]->name, part) == 0) {
                     found = cur->children[j];
                     break;
@@ -190,7 +192,7 @@ void parse_initramfs(void) {
                 }
 
                 void *filedata = (type == ENTRY_FILE) ? data : NULL;
-                SIZE size = (type == ENTRY_FILE) ? filesize : 0;
+                size_t size = (type == ENTRY_FILE) ? filesize : 0;
 
                 found = make_dir_entry(part, type, size, filedata, cur);
                 add_child(cur, found);
@@ -208,20 +210,20 @@ void parse_initramfs(void) {
 void parse_initramfs_root(void) {
     if (!initramfs_in_ram) return;
 
-    for (UINT8 *ptr = initramfs_in_ram;;) {
+    for (uint8_t *ptr = initramfs_in_ram;;) {
         struct cpio_newc_header *hdr = (struct cpio_newc_header *) ptr;
 
         if (memcmp(hdr->c_magic, "070701", 6) != 0) break;
 
-        SIZE namesize = hex_to_ulong(hdr->c_namesize, 8);
-        SIZE filesize = hex_to_ulong(hdr->c_filesize, 8);
+        size_t namesize = hex_to_ulong(hdr->c_namesize, 8);
+        size_t filesize = hex_to_ulong(hdr->c_filesize, 8);
         char *name = (char *)(ptr + sizeof(struct cpio_newc_header));
 
         if (namesize >= 11 && strncmp(name, "TRAILER!!!", 10) == 0) break;
 
         if (!(namesize == 2 && name[0] == '.')) {
             kprintf("/");
-            for (SIZE i = 0; i < namesize - 1; i++)
+            for (size_t i = 0; i < namesize - 1; i++)
                 kprintf("%c", name[i]);
             kprintf("\n");
         }
@@ -237,12 +239,12 @@ void initramfs_init(struct initramfs initramfs)
         panic("initramfs is not loaded properly\n");
     }
 
-    initramfs_in_ram = (UINT8 *) kmalloc(initramfs.size);
+    initramfs_in_ram = (uint8_t *) kmalloc(initramfs.size);
     if (!initramfs_in_ram) {
         panic("failed to allocate memory for initramfs\n");
     }
 
-    for (SIZE i = 0; i < initramfs.size; i++) {
+    for (size_t i = 0; i < initramfs.size; i++) {
         initramfs_in_ram[i] = initramfs.start[i];
     }
 
@@ -274,7 +276,7 @@ struct dir_entry *find_entry(const char *path) {
         struct dir_entry *next = NULL;
         if (dir->type != ENTRY_DIR) return NULL;
 
-        for (SIZE i = 0; i < dir->child_count; i++) {
+        for (size_t i = 0; i < dir->child_count; i++) {
             if (strcmp(dir->children[i]->name, part) == 0) {
                 next = dir->children[i];
                 break;
@@ -302,7 +304,7 @@ void print_dir(const char *path)
         return;
     }
 
-    for (SIZE i = 0; i < dir->child_count; i++) {
+    for (size_t i = 0; i < dir->child_count; i++) {
         struct dir_entry *child = dir->children[i];
         if (child->type == ENTRY_DIR) {
                 kprintf("%%l%s%%w\n", child->name);               

@@ -4,9 +4,9 @@
 #include "xenon/memory.h"
 
 
-SIZE strlen(const char *s)
+size_t strlen(const char *s)
 {
-        SIZE len = 0;
+        size_t len = 0;
         while (s[len] != '\0') {
                 len++;
         }
@@ -15,20 +15,20 @@ SIZE strlen(const char *s)
 
 char *strdup(const char *s)
 {
-        SIZE len = strlen(s);
+        size_t len = strlen(s);
 
         char *copy = (char *)kmalloc(len + 1);
-        for (SIZE i = 0; i <= len; i++) {
+        for (size_t i = 0; i <= len; i++) {
                 copy[i] = s[i];
         }
         return copy;
 }
 
-int strncmp(const char *s1, const char *s2, SIZE n)
+int strncmp(const char *s1, const char *s2, size_t n)
 {
-        for (SIZE i = 0; i < n; i++) {
-                UINT8 c1 = (UINT8)s1[i];
-                UINT8 c2 = (UINT8)s2[i];
+        for (size_t i = 0; i < n; i++) {
+                uint8_t c1 = (uint8_t)s1[i];
+                uint8_t c2 = (uint8_t)s2[i];
 
                 if (c1 != c2) {
                         return (int)c1 - (int)c2;
@@ -60,7 +60,7 @@ int strcmp(const char *s1, const char *s2)
                 s1++;
                 s2++;
         }
-        return (UINT8)*s1 - (UINT8)*s2;
+        return (uint8_t)*s1 - (uint8_t)*s2;
 }
 
 char *strcat(char *dest, const char *s)
@@ -82,42 +82,42 @@ char *strcat(char *dest, const char *s)
         return ret;
 }
 
-void *memset(void *dest, int value, SIZE count)
+void *memset(void *dest, int value, size_t count)
 {
-        UINT8 *ptr = (UINT8 *)dest;
-        for (UINT32 i = 0; i < count; i++) {
-                ptr[i] = (UINT8)value;
+        uint8_t *ptr = (uint8_t *)dest;
+        for (uint32_t i = 0; i < count; i++) {
+                ptr[i] = (uint8_t)value;
         }
         return dest;
 }
 
-void *memcpy(void *dest, const void *s, SIZE count)
+void *memcpy(void *dest, const void *s, size_t count)
 {
-        UINT8 *d = (UINT8 *)dest;
-        const UINT8 *str = (const UINT8 *)s;
-        for (UINT32 i = 0; i < count; i++) {
+        uint8_t *d = (uint8_t *)dest;
+        const uint8_t *str = (const uint8_t *)s;
+        for (uint32_t i = 0; i < count; i++) {
                 d[i] = str[i];
         }
         return dest;
 }
 
-char *strncpy(char *dest, const char *s, SIZE n)
+char *strncpy(char *dest, const char *s, size_t n)
 {
         for (unsigned i = 0; i < n && s[i] != '\0'; i++) {
                 dest[i] = s[i];
         }
-        for (SIZE i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
                 dest[i] = '\0';
         }
         return dest;
 }
 
-int memcmp(const void *s1, const void *s2, SIZE n)
+int memcmp(const void *s1, const void *s2, size_t n)
 {
-        const UINT8 *p1 = (const UINT8 *)s1;
-        const UINT8 *p2 = (const UINT8 *)s2;
+        const uint8_t *p1 = (const uint8_t *)s1;
+        const uint8_t *p2 = (const uint8_t *)s2;
 
-        for (SIZE i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
                 if (p1[i] != p2[i]) {
                         return (p1[i] < p2[i]) ? -1 : 1;
                 }
@@ -171,13 +171,13 @@ const char *strrchr(const char *s, char c)
         return last;
 }
 
-unsigned long strtol(const char *s, char **endptr, int base)
+size_t strtol(const char *s, char **endptr, int base)
 {
-        SIZE result = 0;
+        size_t result = 0;
         char c;
 
         while ((c = *s++) != 0) {
-                UINT32 val;
+                uint32_t val;
                 if (c >= '0' && c <= '9') {
                         val = c - '0';
                 } else if (c >= 'A' && c <= 'F') {
@@ -188,7 +188,7 @@ unsigned long strtol(const char *s, char **endptr, int base)
                         break;
                 }
 
-                if (val >= (UINT32)base) {
+                if (val >= (uint32_t)base) {
                         break;
                 }
 
@@ -201,13 +201,13 @@ unsigned long strtol(const char *s, char **endptr, int base)
 }
 
 
-int snprintf(char *buf, SIZE size, 
+int snprintf(char *buf, size_t size, 
                     const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    SIZE pos = 0;
-    for (SIZE i = 0; fmt[i] != '\0'; i++) {
+    size_t pos = 0;
+    for (size_t i = 0; fmt[i] != '\0'; i++) {
         if (fmt[i] == '%' && fmt[i + 1] != '\0') {
             i++;
             char temp[64];
@@ -221,7 +221,7 @@ int snprintf(char *buf, SIZE size,
                 }
                 case 's': {
                     char *s = va_arg(args, char *);
-                    for (SIZE j = 0; s[j] != '\0'; j++) {
+                    for (size_t j = 0; s[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = s[j];
                         pos++;
                     }
@@ -230,7 +230,7 @@ int snprintf(char *buf, SIZE size,
                 case 'd': {
                     int d = va_arg(args, int);
                     itoa(d, temp, 10);
-                    for (SIZE j = 0; temp[j] != '\0'; j++) {
+                    for (size_t j = 0; temp[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = temp[j];
                         pos++;
                     }
@@ -239,7 +239,7 @@ int snprintf(char *buf, SIZE size,
                 case 'x': {
                     int x = va_arg(args, int);
                     itoa(x, temp, 16);
-                    for (SIZE j = 0; temp[j] != '\0'; j++) {
+                    for (size_t j = 0; temp[j] != '\0'; j++) {
                         if (pos + 1 < size) buf[pos] = temp[j];
                         pos++;
                     }

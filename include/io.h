@@ -5,7 +5,7 @@
 #include "xenon/type.h"
 
 
-UINT8 inb(UINT16 port);
-void outb(UINT16 port, UINT8 val);
+uint8_t inb(uint16_t port);
+void outb(uint16_t port, uint8_t val);
 
-#endif /* IO_H */
+#endif

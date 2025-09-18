@@ -13,18 +13,18 @@ extern char *heap_ptr;
 
 
 struct heap_block {
-        SIZE size;
+        size_t size;
         int free;
         struct heap_block *next;
         struct heap_block *prev;
 };
 
 
-void *kmalloc(SIZE size);
+void *kmalloc(size_t size);
 void kfree(void *ptr);
-void *kcalloc(SIZE nmemb, SIZE size);
-void *krealloc(void *ptr, SIZE new_size);
+void *kcalloc(size_t nmemb, size_t size);
+void *krealloc(void *ptr, size_t new_size);
 void print_heap();
 
 
-#endif /* MEMORY_H */
+#endif

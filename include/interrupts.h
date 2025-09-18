@@ -6,4 +6,4 @@ void enable_interrupts();
 void disable_interrupts();
 
 
-#endif /* INTERRUPTS_H */
+#endif

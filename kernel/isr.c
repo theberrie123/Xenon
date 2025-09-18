@@ -14,10 +14,10 @@
 
 
 struct registers {
-        UINT32 eax;
-        UINT32 ebx;
-        UINT32 ecx;
-        UINT32 edx;
+        uint32_t eax;
+        uint32_t ebx;
+        uint32_t ecx;
+        uint32_t edx;
 };
 
 struct registers regs;
@@ -31,11 +31,11 @@ int isr80_handler_c()
                 case SYS_WRITE:
                         int write_fd = regs.ebx;
                         const char *write_buf = (const char *)regs.ecx;
-                        SIZE write_count = (SIZE)regs.edx;
+                        size_t write_count = (size_t)regs.edx;
 
                         /* stdout */
                         if (write_fd == 1) {
-                                for (SIZE i = 0; i < write_count; i++) {
+                                for (size_t i = 0; i < write_count; i++) {
                                         kputchar(write_buf[i]);
                                 }
                         }
@@ -86,7 +86,7 @@ void isr_handler_c(struct regs *regs)
 
 
 
-void isr_register_handler(UINT8 n, isr_handler_t handler)
+void isr_register_handler(uint8_t n, isr_handler_t handler)
 {
     if (n < ISR_COUNT)
         interrupt_handlers[n] = handler;
@@ -122,7 +122,7 @@ static void* isr_stubs[ISR_COUNT] = {
 
 void isr_init()
 {
-        for (UINT8 i = 0; i < ISR_COUNT; i++) {
+        for (uint8_t i = 0; i < ISR_COUNT; i++) {
                 idt_set_entry(i, isr_stubs[i], 0x8E);
         }
 }

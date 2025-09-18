@@ -15,9 +15,9 @@
 
 
 void pit_init();
-void pit_set_frequency(UINT32 frequency_hz);
-UINT64 get_jiffies();
+void pit_set_frequency(uint32_t frequency_hz);
+uint64_t get_jiffies();
 void pit_irq_handler();
 
 
-#endif /* PIT_H */
+#endif

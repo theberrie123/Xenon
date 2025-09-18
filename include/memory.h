@@ -39,10 +39,10 @@ static inline void kheap_unlock()
 
 
 void kheap_init();
-void *kmalloc(SIZE size);
+void *kmalloc(size_t size);
 void kfree(void *ptr);
-void *krealloc(void *ptr, SIZE new_size);
-void *kcalloc(SIZE n, SIZE size);
+void *krealloc(void *ptr, size_t new_size);
+void *kcalloc(size_t n, size_t size);
 
 
-#endif /* MEMORY_H */
+#endif

@@ -95,7 +95,7 @@ extern void isr_stub_30(void);
 extern void isr_stub_31(void);
 
 
-extern void isr_handler_c(UINT32 int_no, UINT32 err_code);
+extern void isr_handler_c(uint32_t int_no, uint32_t err_code);
 extern void irq0_c(void);
 extern void irq1_c(void);
 
@@ -111,9 +111,9 @@ void (*isr_stubs[32])(void) = {
 };
 
 
-void idt_set_entry(UINT8 vector, void *isr, UINT8 flags)
+void idt_set_entry(uint8_t vector, void *isr, uint8_t flags)
 {
-        UINT32 addr = (UINT32)isr;
+        uint32_t addr = (uint32_t)isr;
         struct idt_entry* desc = &idt[vector];
 
         desc->isr_low = addr & 0xFFFF;
@@ -126,7 +126,7 @@ void idt_set_entry(UINT8 vector, void *isr, UINT8 flags)
 
 void idt_init()
 {
-        idtr.base = (UINT32)&idt[0];
+        idtr.base = (uint32_t)&idt[0];
         idtr.limit = (sizeof(struct idt_entry) * IDT_SIZE) - 1;
 
         extern void irq0_handler();

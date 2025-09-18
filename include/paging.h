@@ -6,8 +6,8 @@
 
 
 #define PAGE_SIZE               4096
-#define PAGE_ALIGN_DOWN(x)      ((UINT32)(x) & ~(PAGE_SIZE-1))
-#define PAGE_ALIGN_UP(x)        ((UINT32)(x) + PAGE_SIZE-1) & ~(PAGE_SIZE-1)
+#define PAGE_ALIGN_DOWN(x)      ((uint32_t)(x) & ~(PAGE_SIZE-1))
+#define PAGE_ALIGN_UP(x)        ((uint32_t)(x) + PAGE_SIZE-1) & ~(PAGE_SIZE-1)
 
 #define P_PRESENT       (1u << 0)
 #define P_RW            (1u << 1)
@@ -20,8 +20,8 @@
 #define P_GLOBAL        (1u << 8)
 
 
-typedef UINT32 pte_t;
-typedef UINT32  pde_t;
+typedef uint32_t pte_t;
+typedef uint32_t pde_t;
 
 typedef struct page_table {
         pte_t entries[1024];
@@ -34,9 +34,9 @@ typedef struct page_directory {
 
 void paging_init_identity_4mb();
 void paging_enable(page_directory_t *pd_phys);
-void page_fault_isr(UINT32 err_code);
-int map_page(page_directory_t *pd, UINT32 vaddr, UINT32 paddr, UINT32 flags);
-int unmap_page(page_directory_t *pd, UINT32 vaddr);
+void page_fault_isr(uint32_t err_code);
+int map_page(page_directory_t *pd, uint32_t vaddr, uint32_t paddr, uint32_t flags);
+int unmap_page(page_directory_t *pd, uint32_t vaddr);
 
 
-#endif /* PAGING_H */
+#endif

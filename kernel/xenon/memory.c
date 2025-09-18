@@ -32,7 +32,7 @@ void coalesce(struct heap_block *block)
         }
 }
 
-void *kmalloc(SIZE size)
+void *kmalloc(size_t size)
 {
         if (size == 0) {
                 return NULL;
@@ -49,7 +49,7 @@ void *kmalloc(SIZE size)
                 curr = curr->next;
         }
 
-        SIZE required_space = size + sizeof(struct heap_block);
+        size_t required_space = size + sizeof(struct heap_block);
 
         if (heap_ptr + required_space > heap_end) {
                 return NULL;
@@ -91,13 +91,13 @@ void kfree(void *ptr)
         coalesce(block);
 }
 
-void *kcalloc(SIZE nmemb, SIZE size)
+void *kcalloc(size_t nmemb, size_t size)
 {
         if (nmemb == 0 || size == 0) {
                 return NULL;
         }
 
-        SIZE total = nmemb * size;
+        size_t total = nmemb * size;
         if (total / nmemb != size) {
                 return NULL;
         }
@@ -108,13 +108,13 @@ void *kcalloc(SIZE nmemb, SIZE size)
         }
 
         char *p = ptr;
-        for (SIZE i = 0; i < total; i++) {
+        for (size_t i = 0; i < total; i++) {
                 p[i] = 0;
         }
         return ptr;
 }
 
-void *krealloc(void *ptr, SIZE new_size)
+void *krealloc(void *ptr, size_t new_size)
 {
         if (!ptr) {
                 return kmalloc(new_size);
@@ -139,7 +139,7 @@ void *krealloc(void *ptr, SIZE new_size)
         char *src = ptr;
         char *dst = new_ptr;
 
-        for (SIZE i = 0; i < block->size; i++) {
+        for (size_t i = 0; i < block->size; i++) {
                 dst[i] = src[i];
         }
 

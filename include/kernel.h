@@ -18,4 +18,4 @@
 #include "irq.h"
 
 
-#endif /* KERNEL_H */
+#endif

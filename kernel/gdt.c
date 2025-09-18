@@ -4,7 +4,7 @@
 static struct gdt_entry gdt[3];
 static struct gdt_ptr gdtr;
 
-static void gdt_set_entry(int idx, UINT32 base, UINT32 limit, UINT8 access, UINT8 gran)
+static void gdt_set_entry(int idx, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
 {
         gdt[idx].limit_low = limit & 0xFFFF;
         gdt[idx].base_low = base & 0xFFFF;
@@ -21,7 +21,7 @@ void gdt_init()
         gdt_set_entry(2, 0, 0xFFFFF, 0x92, 0xCF);
 
         gdtr.limit = sizeof(gdt) - 1;
-        gdtr.base = (UINT32)&gdt;
+        gdtr.base = (uint32_t)&gdt;
 
         __asm__ __volatile__ ("lgdt %0" : : "m"(gdtr));
 

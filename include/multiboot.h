@@ -23,44 +23,44 @@
 #define MULTIBOOT_INFO_FRAMEBUFFER     0x00001000
 
 struct multiboot_module {
-        UINT32 mod_start;
-        UINT32 mod_end;
-        UINT32 string;
-        UINT32 reserved;
+        uint32_t mod_start;
+        uint32_t mod_end;
+        uint32_t string;
+        uint32_t reserved;
 } __attribute__((packed));
 
 struct multiboot_info {
-        UINT32 flags;
-        UINT32 mem_lower;
-        UINT32 mem_upper;
-        UINT32 boot_device;
-        UINT32 cmdline;
-        UINT32 mods_count;
-        UINT32 mods_addr;
-        UINT32 syms[4];
-        UINT32 mmap_length;
-        UINT32 mmap_addr;
-        UINT32 drives_length;
-        UINT32 drives_addr;
-        UINT32 config_table;
-        UINT32 boot_loader_name;
-        UINT32 apm_table;
-        UINT32 vbe_control_info;
-        UINT32 vbe_mode_info;
-        UINT32 vbe_mode;
-        UINT32 vbe_interface_seg;
-        UINT32 vbe_interface_off;
-        UINT32 vbe_interface_len;
+        uint32_t flags;
+        uint32_t mem_lower;
+        uint32_t mem_upper;
+        uint32_t boot_device;
+        uint32_t cmdline;
+        uint32_t mods_count;
+        uint32_t mods_addr;
+        uint32_t syms[4];
+        uint32_t mmap_length;
+        uint32_t mmap_addr;
+        uint32_t drives_length;
+        uint32_t drives_addr;
+        uint32_t config_table;
+        uint32_t boot_loader_name;
+        uint32_t apm_table;
+        uint32_t vbe_control_info;
+        uint32_t vbe_mode_info;
+        uint32_t vbe_mode;
+        uint32_t vbe_interface_seg;
+        uint32_t vbe_interface_off;
+        uint32_t vbe_interface_len;
 } __attribute__((packed));
 
 struct multiboot_header {
-        UINT32 magic;
-        UINT32 flags;
-        UINT32 checksum;
-        UINT32 header_addr;
-        UINT32 load_addr;
-        UINT32 bss_end_addr;
-        UINT32 entry_addr;
+        uint32_t magic;
+        uint32_t flags;
+        uint32_t checksum;
+        uint32_t header_addr;
+        uint32_t load_addr;
+        uint32_t bss_end_addr;
+        uint32_t entry_addr;
 } __attribute__((packed));
 
 

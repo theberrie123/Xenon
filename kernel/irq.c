@@ -2,6 +2,7 @@
 #include "pit.h"
 
 
+/* PIT tick */
 __attribute__((naked))
 void irq0_handler()
 {

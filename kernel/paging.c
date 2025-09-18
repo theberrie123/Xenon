@@ -11,58 +11,58 @@ static void page_fault_isr_wrapper(struct regs *regs)
 static page_directory_t kernel_pd __attribute__((aligned(4096)));
 static page_table_t first_pt __attribute__((aligned(4096)));
 
-static inline void write_cr3(UINT32 phys)
+static inline void write_cr3(uint32_t phys)
 {
         __asm__ __volatile__ ("mov %0, %%cr3" :: "r"(phys) : "memory");
 }
 
-static inline UINT32 read_cr2()
+static inline uint32_t read_cr2()
 {
-        UINT32 cr2;
+        uint32_t cr2;
         __asm__ __volatile__ ("mov %%cr2, %0" : "=r"(cr2));
         return cr2;
 }
 
 static inline void enable_paging()
 {
-        UINT32 cr0;
+        uint32_t cr0;
         __asm__ __volatile__ ("mov %%cr0, %0" : "=r"(cr0));
         cr0 |= 0x80000000u;
         __asm__ __volatile__ ("mov %0, %%cr0" :: "r"(cr0) : "memory");
 }
 
-static inline UINT32 virt_to_phys(void *v)
+static inline uint32_t virt_to_phys(void *v)
 {
-        return (UINT32)v;
+        return (uint32_t)v;
 }
 
 void paging_enable(page_directory_t *pd_phys)
 {
-        write_cr3((UINT32)pd_phys);
+        write_cr3((uint32_t)pd_phys);
         enable_paging();
 }
 
-int map_page(page_directory_t *pd, UINT32 vaddr, UINT32 paddr, UINT32 flags)
+int map_page(page_directory_t *pd, uint32_t vaddr, uint32_t paddr, uint32_t flags)
 {
-        SIZE pd_i = (vaddr >> 22) & 0x3FF;
-        SIZE pt_i = (vaddr >> 12) & 0x3FF;
+        size_t pd_i = (vaddr >> 22) & 0x3FF;
+        size_t pt_i = (vaddr >> 12) & 0x3FF;
         pde_t pde = pd->entries[pd_i];
         if (!(pde & P_PRESENT)) {
                 return -1;
         }
-        page_table_t *pt = (page_table_t*)(UINT32)(pde & ~0xFFFu);
+        page_table_t *pt = (page_table_t *)(uint32_t)(pde & ~0xFFFu);
         pt->entries[pt_i] = (pte_t)(PAGE_ALIGN_DOWN(paddr) | (flags | P_PRESENT));
         __asm__ __volatile__ ("invlpg (%0)" :: "r"(vaddr) : "memory");
         return 0;
 }
 
-int unmap_page(page_directory_t *pd, UINT32 vaddr)
+int unmap_page(page_directory_t *pd, uint32_t vaddr)
 {
-        SIZE pd_i = (vaddr >> 22) & 0x3FF;
-        SIZE pt_i = (vaddr >> 12) & 0x3FF;
+        size_t pd_i = (vaddr >> 22) & 0x3FF;
+        size_t pt_i = (vaddr >> 12) & 0x3FF;
         pde_t pde = pd->entries[pd_i];
         if (!(pde & P_PRESENT)) return -1;
-        page_table_t *pt = (page_table_t*)(UINT32)(pde & ~0xFFFu);
+        page_table_t *pt = (page_table_t *)(uint32_t)(pde & ~0xFFFu);
         pt->entries[pt_i] = 0;
         __asm__ __volatile__ ("invlpg (%0)" :: "r"(vaddr) : "memory");
         return 0;
@@ -75,7 +75,7 @@ void paging_init_identity_4mb(void) {
     }
 
     for (int i = 0; i < 1024; ++i) {
-        UINT32 frame = (UINT32)i * PAGE_SIZE;
+        uint32_t frame = (uint32_t)i * PAGE_SIZE;
         first_pt.entries[i] = (pte_t)(frame | P_RW | P_PRESENT);
     }
 
@@ -87,8 +87,8 @@ void paging_init_identity_4mb(void) {
 
 }
 
-void page_fault_isr(UINT32 err_code) {
-        UINT32 fault_addr = read_cr2();
+void page_fault_isr(uint32_t err_code) {
+        uint32_t fault_addr = read_cr2();
 
         int present = !(err_code & 0x1);        
         int rw = err_code & 0x2;

@@ -7,20 +7,20 @@
 
 #define CURSOR_SIZE 10
 
-static volatile UINT16 *VGA_MEMORY = (volatile UINT16*)0xB8000;
+static volatile uint16_t *VGA_MEMORY = (volatile uint16_t *)0xB8000;
 
-static SIZE cursor_row = 0;
-static SIZE cursor_col = 0;
+static size_t cursor_row = 0;
+static size_t cursor_col = 0;
 
-static UINT8 KCOLOR = 0x0F;
+static uint8_t KCOLOR = 0x0F;
 
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 
 
-static inline UINT16 vga_entry(UINT8 c, UINT8 color)
+static inline uint16_t vga_entry(uint8_t c, uint8_t color)
 {
-        return (UINT16)c | ((UINT16)color << 8);
+        return (uint16_t)c | ((uint16_t)color << 8);
 }
 
 
@@ -31,13 +31,13 @@ static void kscroll()
                 return;
         }
 
-        for (SIZE row = 1; row < VGA_HEIGHT; row++) {
-                for (SIZE col = 0; col < VGA_WIDTH; col++) {
+        for (size_t row = 1; row < VGA_HEIGHT; row++) {
+                for (size_t col = 0; col < VGA_WIDTH; col++) {
                         VGA_MEMORY[(row - 1) * VGA_WIDTH + col] = VGA_MEMORY[row * VGA_WIDTH + col];
                 }
         }
 
-        for (SIZE col = 0; col < VGA_WIDTH; col++) {
+        for (size_t col = 0; col < VGA_WIDTH; col++) {
                 VGA_MEMORY[(VGA_HEIGHT - 1) * VGA_WIDTH + col] = vga_entry(' ', KCOLOR);
         }
 
@@ -54,8 +54,8 @@ void kinit()
 
 void kclear()
 {
-        for (SIZE row = 0; row < VGA_HEIGHT; row++) {
-                for (SIZE col = 0; col < VGA_WIDTH; col++) {
+        for (size_t row = 0; row < VGA_HEIGHT; row++) {
+                for (size_t col = 0; col < VGA_WIDTH; col++) {
                         VGA_MEMORY[row * VGA_WIDTH + col] = vga_entry(' ', KCOLOR);
                 }
         }
@@ -63,7 +63,7 @@ void kclear()
         cursor_col = 0;
 }
 
-void tty_move_cursor(SIZE row, SIZE col) {
+void tty_move_cursor(size_t row, size_t col) {
         if (row >= VGA_HEIGHT) {
                 row = VGA_HEIGHT - 1;
         }
@@ -74,7 +74,7 @@ void tty_move_cursor(SIZE row, SIZE col) {
         cursor_row = row;
         cursor_col = col;
 
-        UINT16 pos = cursor_row * VGA_WIDTH + cursor_col;
+        uint16_t pos = cursor_row * VGA_WIDTH + cursor_col;
 
         outb(0x3D4, 0x0E);
         outb(0x3D5, (pos >> 8) & 0xFF);
@@ -82,7 +82,7 @@ void tty_move_cursor(SIZE row, SIZE col) {
         outb(0x3D5, pos & 0xFF);
 }
 
-void tty_set_color(UINT8 color)
+void tty_set_color(uint8_t color)
 {
         KCOLOR = color;
 }
@@ -201,7 +201,7 @@ void kprintf(const char *format, ...)
                                         break;
                                 }
                                 case 'u': {
-                                        UINT32 u = va_arg(args, UINT32);
+                                        uint32_t u = va_arg(args, uint32_t);
                                         int_to_str(u, buf);
                                         for (int i = 0; buf[i] != '\0'; i++) {
                                                 kputchar(buf[i]);
@@ -209,7 +209,7 @@ void kprintf(const char *format, ...)
                                         break;
                                 }
                                 case 'x': {
-                                        UINT32 x = va_arg(args, UINT32);
+                                        uint32_t x = va_arg(args, uint32_t);
                                         const char *hex = "0123456789ABCDEF";
                                         for (int i = 28; i >= 0; i -= 4) {
                                                 char ch = hex[(x >> i) & 0xF];
@@ -219,7 +219,7 @@ void kprintf(const char *format, ...)
                                 }
                                 case 'p': {
                                         void *ptr = va_arg(args, void *);
-                                        SIZE addr = (SIZE)ptr;
+                                        size_t addr = (size_t)ptr;
                                         kputchar('0');
                                         kputchar('x');
                     
@@ -277,13 +277,13 @@ void panic(const char *format, ...)
                                         }
                                         break;
                                 case 'u':
-                                        int_to_str(va_arg(args, UINT32), buf);
+                                        int_to_str(va_arg(args, uint32_t), buf);
                                         for (int i = 0; buf[i]; i++) {
                                                 kputchar(buf[i]);
                                         }
                                         break;
                                 case 'x':
-                                        unsigned int x = va_arg(args, UINT32);
+                                        uint32_t x = va_arg(args, uint32_t);
                                         const char *hex = "0123456789ABCDEF";
                                         for (int i = 28; i >= 0; i -= 4) {
                                                 kputchar(hex[(x >> i) & 0xF]);

@@ -2,7 +2,13 @@
 #include "syscall.h"
 
 
+void init_main()
+{
+        kprintf("init (PID 1) starting...\n");
+        for (;;) {
 
+        }
+}
 
 void init()
 {
@@ -25,11 +31,11 @@ void init()
 
 }
 
-void write(int fd, const void *buf, SIZE count)
+void write(int fd, const void *buf, size_t count)
 {
         register int write_register_fd __asm__ ("ebx") = fd;
         register const void *write_register_buf __asm__ ("ecx") = buf;
-        register SIZE write_register_count __asm__ ("edx") = count;
+        register size_t write_register_count __asm__ ("edx") = count;
 
         __asm__ __volatile__ (
                 "movl $1, %%eax\n\t"
@@ -41,7 +47,7 @@ void write(int fd, const void *buf, SIZE count)
 }
 
 
-void kmain(SIZE magic, struct multiboot_info *mbi)
+void kmain(size_t magic, struct multiboot_info *mbi)
 {
         init();
 
@@ -51,12 +57,12 @@ void kmain(SIZE magic, struct multiboot_info *mbi)
 
         if (mbi->flags & MULTIBOOT_INFO_MODS) {
                 struct multiboot_module *mods = (struct multiboot_module *) mbi->mods_addr;
-                for (UINT32 i = 0; i < mbi->mods_count; i++) {
+                for (uint32_t i = 0; i < mbi->mods_count; i++) {
                         struct multiboot_module *mod = &mods[i];
                         if (mod->mod_start && mod->mod_end) {
-                                UINT8 *initramfs_start = (UINT8 *) mod->mod_start;
-                                UINT8 *initramfs_end = (UINT8 *) mod->mod_end;
-                                SIZE initramfs_size = mod->mod_end - mod->mod_start;
+                                uint8_t *initramfs_start = (uint8_t *) mod->mod_start;
+                                uint8_t *initramfs_end = (uint8_t *) mod->mod_end;
+                                size_t initramfs_size = mod->mod_end - mod->mod_start;
 
                                 struct initramfs initramfs = {
                                         .start = initramfs_start,
@@ -76,8 +82,6 @@ void kmain(SIZE magic, struct multiboot_info *mbi)
         print_dir("/");
 
 
-        write(1, "# ", 2);
-        
 
         for (;;) __asm__ __volatile__ ("hlt");
 }

@@ -6,21 +6,21 @@
 
 
 struct gdt_entry {
-        UINT16 limit_low;
-        UINT16 base_low;
-        UINT8 base_middle;
-        UINT8 access;
-        UINT8 granularity;
-        UINT8 base_high;
+        uint16_t limit_low;
+        uint16_t base_low;
+        uint8_t base_middle;
+        uint8_t access;
+        uint8_t granularity;
+        uint8_t base_high;
 } __attribute__((packed));
 
 struct gdt_ptr {
-    UINT16 limit;
-    UINT32 base;
+    uint16_t limit;
+    uint32_t base;
 } __attribute__((packed));
 
 
 void gdt_init();
 
 
-#endif /* GDT_H */
+#endif

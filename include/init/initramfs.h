@@ -31,26 +31,26 @@ struct mount {
 };
 
 struct initramfs {
-        UINT8 *start;
-        UINT8 *end;
-        SIZE size;
+        uint8_t *start;
+        uint8_t *end;
+        size_t size;
 };
 
 struct file_in_ram {
-        UINT8 *data;
-        SIZE size;
+        uint8_t *data;
+        size_t size;
 };
 
 struct dir_entry {
         char *name;
         int type;
-        SIZE size;
+        size_t size;
         void *data;
         struct dir_entry *parent;
 
         struct dir_entry **children;
-        SIZE child_count;
-        SIZE child_capacity;
+        size_t child_count;
+        size_t child_capacity;
 };
 
 struct cpio_newc_header {
@@ -70,7 +70,7 @@ struct cpio_newc_header {
         char c_check[8];
 };
 
-extern UINT8 *initramfs_in_ram;
+extern uint8_t *initramfs_in_ram;
 extern struct dir_entry *root_entry;
 
 struct file_in_ram find_file_in_initramfs(const char *filename);
@@ -79,11 +79,11 @@ void initramfs_init(struct initramfs initramfs);
 
 void parse_initramfs();
 
-struct dir_entry *make_dir_entry(const char *name, int type, SIZE size, void *data, struct dir_entry *parent);
+struct dir_entry *make_dir_entry(const char *name, int type, size_t size, void *data, struct dir_entry *parent);
 void add_child(struct dir_entry *parent, struct dir_entry *child);
 
 struct dir_entry *find_entry(const char *path);
 void print_dir(const char *path);
 
 
-#endif /* INITRAMFS_H */
+#endif
