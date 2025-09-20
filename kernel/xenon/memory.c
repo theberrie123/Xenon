@@ -1,8 +1,8 @@
 #include "xenon/memory.h"
 #include "tty.h"
 
-static struct heap_block *heap_head = NULL;
 
+static struct heap_block *heap_head = NULL;
 
 char *heap_base = &__heap_start;
 char *heap_end = &__heap_end;

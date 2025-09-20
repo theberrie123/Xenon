@@ -201,114 +201,130 @@ size_t strtol(const char *s, char **endptr, int base)
 }
 
 
-int snprintf(char *buf, size_t size, 
-                    const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
+int snprintf(char *buf, size_t size, const char *fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
 
-    size_t pos = 0;
-    for (size_t i = 0; fmt[i] != '\0'; i++) {
-        if (fmt[i] == '%' && fmt[i + 1] != '\0') {
-            i++;
-            char temp[64];
+        size_t pos = 0;
+        for (size_t i = 0; fmt[i] != '\0'; i++) {
+                if (fmt[i] == '%' && fmt[i + 1] != '\0') {
+                        i++;
+                        char temp[64];
 
-            switch (fmt[i]) {
-                case 'c': {
-                    char c = (char)va_arg(args, int);
-                    if (pos + 1 < size) buf[pos] = c;
-                    pos++;
-                    break;
-                }
-                case 's': {
-                    char *s = va_arg(args, char *);
-                    for (size_t j = 0; s[j] != '\0'; j++) {
-                        if (pos + 1 < size) buf[pos] = s[j];
+                        switch (fmt[i]) {
+                                case 'c':
+                                        char c = (char)va_arg(args, int);
+                                        if (pos + 1 < size) {
+                                                buf[pos] = c;
+                                        }
+                                        pos++;
+                                        break;
+                                case 's':
+                                        char *s = va_arg(args, char *);
+                                        for (size_t j = 0; s[j] != '\0'; j++) {
+                                                if (pos + 1 < size) {
+                                                        buf[pos] = s[j];
+                                                }
+                                                pos++;
+                                                break;
+                                        }
+                                case 'd':
+                                        int d = va_arg(args, int);
+                                        itoa(d, temp, 10);
+                                        for (size_t j = 0; temp[j] != '\0'; j++) {
+                                                if (pos + 1 < size) {
+                                                        buf[pos] = temp[j];
+                                                }
+                                                pos++;
+                                        }
+                                        break;
+                                case 'x':
+                                        int x = va_arg(args, int);
+                                        itoa(x, temp, 16);
+                                        for (size_t j = 0; temp[j] != '\0'; j++) {
+                                                if (pos + 1 < size) {
+                                                        buf[pos] = temp[j];
+                                                }
+                                                pos++;
+                                        }
+                                        break;
+                                case '%':
+                                        if (pos + 1 < size) {
+                                                buf[pos] = '%';
+                                        }
+                                        pos++;
+                                        break;
+                                default:
+                                        if (pos + 1 < size) {
+                                                buf[pos] = fmt[i];
+                                        }
+                                        pos++;
+                        }
+                } else {
+                        if (pos + 1 < size) {
+                                buf[pos] = fmt[i];
+                        }
                         pos++;
-                    }
-                    break;
                 }
-                case 'd': {
-                    int d = va_arg(args, int);
-                    itoa(d, temp, 10);
-                    for (size_t j = 0; temp[j] != '\0'; j++) {
-                        if (pos + 1 < size) buf[pos] = temp[j];
-                        pos++;
-                    }
-                    break;
-                }
-                case 'x': {
-                    int x = va_arg(args, int);
-                    itoa(x, temp, 16);
-                    for (size_t j = 0; temp[j] != '\0'; j++) {
-                        if (pos + 1 < size) buf[pos] = temp[j];
-                        pos++;
-                    }
-                    break;
-                }
-                case '%': {
-                    if (pos + 1 < size) buf[pos] = '%';
-                    pos++;
-                    break;
-                }
-                default:
-                    if (pos + 1 < size) buf[pos] = fmt[i];
-                    pos++;
-            }
-        } else {
-            if (pos + 1 < size) buf[pos] = fmt[i];
-            pos++;
         }
-    }
 
-    if (size > 0) {
-        buf[(pos < size) ? pos : size - 1] = '\0';
-    }
+        if (size > 0) {
+                buf[(pos < size) ? pos : size - 1] = '\0';
+        }
 
-    va_end(args);
-    return pos;
+        va_end(args);
+        return pos;
 }
 
 char *strtok(char *str, const char *delim)
 {
-    static char *next;
-    if (str) next = str;
-
-    if (!next) return NULL;
-
-    while (*next) {
-        int is_delim = 0;
-        for (const char *d = delim; *d; d++) {
-            if (*next == *d) {
-                is_delim = 1;
-                break;
-            }
+        static char *next;
+        if (str) {
+                next = str;
         }
-        if (!is_delim) break;
-        next++;
-    }
 
-    if (*next == '\0') return NULL;
-
-    char *start = next;
-
-    while (*next) {
-        int is_delim = 0;
-        for (const char *d = delim; *d; d++) {
-            if (*next == *d) {
-                is_delim = 1;
-                break;
-            }
+        if (!next) {
+                return NULL;
         }
-        if (is_delim) {
-            *next = '\0';
-            next++;
-            return start;
-        }
-        next++;
-    }
 
-    next = NULL;
-    return start;
+        while (*next) {
+                int is_delim = 0;
+                for (const char *d = delim; *d; d++) {
+                        if (*next == *d) {
+                                is_delim = 1;
+                                break;
+                        }
+                }
+                if (!is_delim) {
+                        break;
+                }
+                next++;
+        }
+
+        if (*next == '\0') {
+                return NULL;
+        }
+
+        char *start = next;
+
+        while (*next) {
+                int is_delim = 0;
+                for (const char *d = delim; *d; d++) {
+                        if (*next == *d) {
+                                is_delim = 1;
+                                break;
+                        }
+                }
+                if (is_delim) {
+                        *next = '\0';
+                        next++;
+                        return start;
+                }
+                next++;
+        }
+
+        next = NULL;
+        return start;
 }
 
 char *strchr(const char *s, char c)

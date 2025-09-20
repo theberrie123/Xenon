@@ -254,8 +254,6 @@ void panic(const char *format, ...)
         va_list args;
         va_start(args, format);
 
-        char buf[12];
-
         for (const char *p = format; *p != '\0'; p++) {
                 if (*p == '%') {
                         p++;

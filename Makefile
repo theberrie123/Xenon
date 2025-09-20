@@ -1,23 +1,23 @@
-AS      = as
-ASFLAGS = -32
+AS      	= as
+ASFLAGS 	= -32
 
-CC      = gcc
-CFLAGS  = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie -Wall -Wextra -Iinclude -Iarch/x86/include -c -MMD -MP
+CC      	= gcc
+CFLAGS  	= -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie -Wall -Wextra -Iinclude -Iarch/x86/include -c -MMD -MP
 
-LD      = ld
-LDFLAGS = -m elf_i386 -T linker.ld
+LD      	= ld
+LDFLAGS 	= -m elf_i386 -T linker.ld
 
-SRCDIR    = kernel
-ARCHDIR   = arch
-BUILDDIR  = build
+SRCDIR    	= kernel
+ARCHDIR   	= arch
+BUILDDIR  	= build
 
-KERNEL    = vmxez
+KERNEL    	= vmxez
 
-CFILES := $(shell find $(SRCDIR) -name '*.c')
+CFILES 		:= $(shell find $(SRCDIR) -name '*.c')
 
-COBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES)) \
+COBJS 		:= $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(CFILES)) \
 
-BOOTOBJ = $(BUILDDIR)/boot.o
+BOOTOBJ 	= $(BUILDDIR)/boot.o
 
 all: $(KERNEL)
 

@@ -2,14 +2,6 @@
 #include "syscall.h"
 
 
-void init_main()
-{
-        kprintf("init (PID 1) starting...\n");
-        for (;;) {
-
-        }
-}
-
 void init()
 {
         kinit();
