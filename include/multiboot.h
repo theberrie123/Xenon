@@ -45,12 +45,11 @@ struct multiboot_info {
         uint32_t config_table;
         uint32_t boot_loader_name;
         uint32_t apm_table;
-        uint32_t vbe_control_info;
-        uint32_t vbe_mode_info;
-        uint32_t vbe_mode;
-        uint32_t vbe_interface_seg;
-        uint32_t vbe_interface_off;
-        uint32_t vbe_interface_len;
+        uint32_t framebuffer_addr;
+        uint32_t framebuffer_width;
+        uint32_t framebuffer_height;
+        uint32_t framebuffer_pitch;
+        uint8_t framebuffer_bpp;
 } __attribute__((packed));
 
 struct multiboot_header {
@@ -66,4 +65,4 @@ struct multiboot_header {
 
 extern struct multiboot_info *mbi;
 
-#endif /* MULTIBOOT_H */
+#endif

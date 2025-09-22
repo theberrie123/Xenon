@@ -1,7 +1,6 @@
 #include "kernel.h"
 #include "syscall.h"
 
-
 void init()
 {
         kinit();
@@ -18,8 +17,8 @@ void init()
         kprintf("[%%g  OK  %%w] initialized pit\n");
         enable_interrupts();
         kprintf("[%%g  OK  %%w] enabled interrupts\n");
-        paging_init_identity_4mb();
-        kprintf("[%%g  OK  %%w] initialized paging\n");
+        // paging_init_identity_4mb();
+        // kprintf("[%%g  OK  %%w] initialized paging\n");
 
 }
 
@@ -37,6 +36,8 @@ void write(int fd, const void *buf, size_t count)
                 : "eax"
         );
 }
+
+
 
 
 void kmain(size_t magic, struct multiboot_info *mbi)
@@ -72,8 +73,6 @@ void kmain(size_t magic, struct multiboot_info *mbi)
         }
 
         print_dir("/");
-
-
 
         for (;;) __asm__ __volatile__ ("hlt");
 }
